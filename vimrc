@@ -10,7 +10,11 @@
 " loaded some other way (e.g. saved as `foo`, and then Vim started with
 " `vim -u foo`).
 "set nocompatible
-set term=xterm-256color
+if has("nvim")
+  set termguicolors
+else
+  set term=xterm-256color
+endif
 
 " Turn on syntax highlighting.
 syntax on
