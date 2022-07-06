@@ -47,6 +47,5 @@ set LANG en_US.UTF8
 
 which any-nix-shell &>/dev/null && any-nix-shell fish --info-right | source
 
-set -U FZF_PREVIEW_FILE_CMD "bat --color always --line-range :50"
-set -U FZF_PREVIEW_DIR_CMD "lsd --color always"
-set -U FZF_ENABLE_OPEN_PREVIEW 1
+set -U FZF_DEFAULT_OPTS "--preview 'string match -rq \"[\\\"\\'*]\" {} && exit 1; [ -d \"{}\" ] && lsd --color always \"{}\"; [ -f \"{}\" ] && bat --color always --line-range :50 \"{}\"; '"
+
