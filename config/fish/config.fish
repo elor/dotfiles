@@ -1,6 +1,6 @@
 set PATH ~/.local/bin ~/.cargo/bin /sbin $PATH
 
-#thefuck --alias | source
+which thefuck &>/dev/null && thefuck --alias | source
 
 function ssk; ssh enssim $argv; end
 function ssm; ssh mainsim $argv; end
@@ -44,3 +44,9 @@ function videokilledtheradiostar
 end
 
 set LANG en_US.UTF8
+
+which any-nix-shell &>/dev/null && any-nix-shell fish --info-right | source
+
+set -U FZF_PREVIEW_FILE_CMD "bat --color always --line-range :50"
+set -U FZF_PREVIEW_DIR_CMD "lsd --color always"
+set -U FZF_ENABLE_OPEN_PREVIEW 1
