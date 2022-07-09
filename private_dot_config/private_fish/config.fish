@@ -31,9 +31,11 @@ end
 
 [ -s /opt/ohpc/admin/lmod/lmod/init/fish ] && source /opt/ohpc/admin/lmod/lmod/init/fish
 
-function ls; lsd $argv; end
-function ll; lsd -l $argv; end
-function la; lsd -la $argv; end
+if which lsd &>/dev/null
+  function ls; lsd $argv; end
+  function ll; lsd -l $argv; end
+  function la; lsd -la $argv; end
+end
 
 function videokilledtheradiostar
   set url ( echo "$argv" | grep -o 'https://[^&]*' )
