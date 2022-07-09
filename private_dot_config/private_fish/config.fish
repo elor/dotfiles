@@ -15,10 +15,12 @@ set TZ Europe/Berlin
 
 set -g fish_greeting
 
-function conda
-  functions -e conda
-  eval /beegfs-home/modules/conda/bin/conda "shell.fish" "hook" | source
-  conda $argv
+if [ -f /beegfs-home/modules/conda/bin/conda ];
+  function conda
+    functions -e conda
+    eval /beegfs-home/modules/conda/bin/conda "shell.fish" "hook" | source
+    conda $argv
+  end
 end
 
 function spack
@@ -48,4 +50,12 @@ set LANG en_US.UTF8
 which any-nix-shell &>/dev/null && any-nix-shell fish --info-right | source
 
 set -U FZF_DEFAULT_OPTS "--preview 'string match -rq \"[\\\"\\'*]\" {} && exit 1; [ -d \"{}\" ] && lsd --color always \"{}\"; [ -f \"{}\" ] && bat --color always --line-range :50 \"{}\"; '"
+
+if which nvim &>/dev/null
+  setenv EDITOR (which nvim)
+else if which vim &>/dev/null
+  setenv EDITOR (which vim)
+else
+  setenv EDITOR (which nano)
+end
 

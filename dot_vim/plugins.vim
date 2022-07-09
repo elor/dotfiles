@@ -2,6 +2,8 @@ call plug#begin('~/.vim/plugged')
 
 " tried-and-true
 
+Plug 'github/Copilot.vim'
+
 Plug 'Xuyuanp/nerdtree-git-plugin'
 Plug 'airblade/vim-gitgutter'
 Plug 'ctrlpvim/ctrlp.vim'
@@ -13,7 +15,7 @@ Plug 'majutsushi/tagbar'
 Plug 'mbbill/undotree'
 Plug 'mg979/vim-visual-multi'
 Plug 'mileszs/ack.vim'
-Plug 'puremourning/vimspector'
+"Plug 'puremourning/vimspector'
 Plug 'scrooloose/nerdcommenter'
 Plug 'scrooloose/nerdtree'
 Plug 'tpope/vim-eunuch'
