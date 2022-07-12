@@ -32,6 +32,7 @@ Plug 'elbeardmorez/vim-loclist-follow'
 Plug 'vim-scripts/loremipsum'
 "Plug 'townk/vim-autoclose'
 Plug 'pboettch/vim-cmake-syntax'
+Plug 'cespare/vim-toml'
 "Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 " broken
