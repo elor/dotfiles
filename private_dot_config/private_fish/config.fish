@@ -15,10 +15,19 @@ set TZ Europe/Berlin
 
 set -g fish_greeting
 
-if [ -f /beegfs-home/modules/conda/bin/conda ];
+if [ -f /beegfs-home/modules/conda/bin/conda ]
   function conda
     functions -e conda
     eval /beegfs-home/modules/conda/bin/conda "shell.fish" "hook" | source
+    conda $argv
+  end
+end
+
+if [ -f /opt/homebrew/anaconda3/bin/conda ]
+  function conda
+    functions -e conda
+    eval /opt/homebrew/anaconda3/bin/conda "shell.fish" "hook" $argv | source
+    functions -e fish_right_prompt
     conda $argv
   end
 end
@@ -47,7 +56,7 @@ function videokilledtheradiostar
   exit
 end
 
-set LANG en_US.UTF8
+set LANG en_US.UTF-8
 
 which any-nix-shell &>/dev/null && any-nix-shell fish --info-right | source
 
@@ -61,3 +70,4 @@ else
   setenv EDITOR (which nano)
 end
 
+setenv LC_CTYPE en_US.UTF-8
