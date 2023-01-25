@@ -56,13 +56,8 @@ pcall(require('telescope').load_extension, 'fzf')
 -- See `:help telescope.builtin`
 vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles, { desc = '[?] Find recently opened files' })
 vim.keymap.set('n', '<leader><space>', require('telescope.builtin').buffers, { desc = '[ ] Find existing buffers' })
-vim.keymap.set('n', '<leader>/', function()
-  -- You can pass additional configuration to telescope to change theme, layout, etc.
-  require('telescope.builtin').current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-    winblend = 10,
-    previewer = false,
-  })
-end, { desc = '[/] Fuzzily search in current buffer]' })
+vim.keymap.set('n', '<leader>/', require('telescope.builtin').current_buffer_fuzzy_find,
+  { desc = '[/] Fuzzily search in current buffer]' })
 
 vim.keymap.set('n', '<leader>sf', require('telescope.builtin').find_files, { desc = '[S]earch [F]iles' })
 vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc = '[S]earch [H]elp' })
@@ -71,7 +66,7 @@ vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 vim.keymap.set('n', '<leader>sb', require('telescope.builtin').buffers, { desc = '[S]earch [D]iagnostics' })
 
-vim.keymap.set('n', '<leader>tk', require('telescope.builtin').keymaps, { desc = '[S]earch [D]iagnostics' })
+vim.keymap.set('n', '<leader>sk', require('telescope.builtin').keymaps, { desc = '[S]earch [K]eymaps' })
 
 vim.keymap.set('n', '<C-P>', require('telescope.builtin').git_files, { desc = 'Search Git Files' })
 
@@ -188,6 +183,9 @@ local on_attach = function(_, bufnr)
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, '[W]orkspace [L]ist Folders')
 
+  -- LazyGit shortcut
+  nmap('<leader>gg', vim.cmd.LazyGit, 'Lazy[G]it Terminal')
+
   -- Create a command `:Format` local to the LSP buffer
   vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
     vim.lsp.buf.format()
@@ -257,29 +255,32 @@ cmp.setup {
   mapping = cmp.mapping.preset.insert {
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-Space>'] = cmp.mapping.complete({}),
     ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
+    --
+    -- Tab and S-Tab are disabled: They clash with Copilot, and you can use the arrow keys instead
+    --
+    -- ['<Tab>'] = cmp.mapping(function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_next_item()
+    --   elseif luasnip.expand_or_jumpable() then
+    --     luasnip.expand_or_jump()
+    --   else
+    --     fallback()
+    --   end
+    -- end, { 'i', 's' }),
+    -- ['<S-Tab>'] = cmp.mapping(function(fallback)
+    --   if cmp.visible() then
+    --     cmp.select_prev_item()
+    --   elseif luasnip.jumpable(-1) then
+    --     luasnip.jump(-1)
+    --   else
+    --     fallback()
+    --   end
+    -- end, { 'i', 's' }),
   },
   sources = {
     { name = 'nvim_lsp' },
@@ -287,10 +288,24 @@ cmp.setup {
   },
 }
 
+
+require("trouble").setup({
+  auto_open = false,
+  auto_close = false,
+  auto_preview = true,
+  auto_fold = false,
+  height = 5,
+})
+
 -- refactoring setup --
 require('refactoring').setup({})
 -- load refactoring Telescope extension
+--
 require("telescope").load_extension("refactoring")
+
+-- Git plugin
+require("telescope").load_extension("lazygit")
+
 -- remap to open the Telescope refactoring menu in visual mode
 vim.api.nvim_set_keymap(
   "v",
@@ -302,6 +317,9 @@ vim.api.nvim_set_keymap(
 vim.keymap.set("n", "<leader>y", "\"+y")
 vim.keymap.set("v", "<leader>y", "\"+y")
 vim.keymap.set("n", "<leader>Y", "\"+Y")
+
+-- exit terminal mode using <Esc>
+vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

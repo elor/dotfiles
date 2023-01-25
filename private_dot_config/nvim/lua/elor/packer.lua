@@ -11,6 +11,9 @@ require('packer').startup(function(use)
   -- Package manager
   use 'wbthomason/packer.nvim'
 
+  -- Copilot
+  use 'github/Copilot.vim'
+
   use {
     'VonHeikemen/lsp-zero.nvim',
     requires = {
@@ -37,14 +40,14 @@ require('packer').startup(function(use)
       { 'L3MON4D3/LuaSnip' },
       -- Snippet Collection (Optional)
       { 'rafamadriz/friendly-snippets' },
-
-      -- Copilot
-      { 'github/Copilot.vim' },
     }
   }
 
   -- error list
-  use 'folke/trouble.nvim'
+  use {
+    "folke/trouble.nvim",
+    requires = "kyazdani42/nvim-web-devicons",
+  }
 
   use { -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -73,12 +76,11 @@ require('packer').startup(function(use)
   }
 
   use "weilbith/nvim-code-action-menu"
-  use 'nvim-tree/nvim-web-devicons'
+  use 'ryanoasis/vim-devicons'
 
   -- Git related plugins
-  use 'tpope/vim-fugitive'
-  use 'tpope/vim-rhubarb'
-  use 'lewis6991/gitsigns.nvim'
+  use 'lewis6991/gitsigns.nvim' -- Git signs at each line
+  use 'kdheepak/lazygit.nvim' -- interactive git tool; it's amazing
 
   use 'navarasu/onedark.nvim' -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim' -- Fancier statusline
@@ -121,4 +123,3 @@ if is_bootstrap then
   print '=================================='
   return
 end
-
