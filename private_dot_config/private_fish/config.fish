@@ -46,16 +46,6 @@ if which lsd &>/dev/null
   function la; lsd -la $argv; end
 end
 
-function videokilledtheradiostar
-  set url ( echo "$argv" | grep -o 'https://[^&]*' )
-  while ! youtube-dl -F "$url"
-    echo not yet
-    sleep 30
-  end
-  mail -s 'Video killed the radio star' erik.e.lorenz@gmail.com < /dev/null
-  exit
-end
-
 set LANG en_US.UTF-8
 
 which any-nix-shell &>/dev/null && any-nix-shell fish --info-right | source
