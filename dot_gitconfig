@@ -1,0 +1,14 @@
+[user]
+	name = Erik E. Lorenz
+	email = erik@tuvero.de
+[core]
+	autocrlf = input
+	excludesfile = ~/.gitignore
+
+[alias]
+	graph = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+	lazy = !lazygit
+
+[diff]
+	tool = icdiff
+
