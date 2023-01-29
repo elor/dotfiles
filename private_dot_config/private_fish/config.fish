@@ -1,12 +1,17 @@
+# no prepend-path since we're running old fish versions on some workstations :-(
 set PATH ~/.local/bin ~/.cargo/bin /sbin $PATH
 
 which thefuck &>/dev/null && thefuck --alias | source
 
+# ssh aliases
 function ssk; ssh enssim $argv; end
 function ssm; ssh mainsim $argv; end
 function sst; ssh mainsimts1 $argv; end
 function ssw; ssh mainsimweb $argv; end
 function ssp; ssh simpc17 $argv; end
+function sslm; ssh localmainsim $argv; end
+
+alias lg=lazygit
 
 function explorer; explorer.exe $argv; end
 set DISPLAY :0.0
