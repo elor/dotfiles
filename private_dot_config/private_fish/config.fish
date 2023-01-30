@@ -20,6 +20,17 @@ set TZ Europe/Berlin
 
 set -g fish_greeting
 
+function fisher_setup
+  if not functions -q fisher
+    curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher
+  end
+  fisher install jorgebucaran/fisher
+  fisher install jorgebucaran/autopair.fish
+  fisher install acomagu/fish-async-prompt
+  fisher install jbonjean/re-search
+  fisher install jethrokuan/fzf
+end
+
 if [ -f /beegfs-home/modules/conda/bin/conda ]
   function conda
     functions -e conda
