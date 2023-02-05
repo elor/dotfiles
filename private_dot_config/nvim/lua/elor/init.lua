@@ -311,7 +311,6 @@ require("trouble").setup({
 -- refactoring setup --
 require('refactoring').setup({})
 -- load refactoring Telescope extension
---
 require("telescope").load_extension("refactoring")
 
 -- Git plugin
@@ -325,6 +324,7 @@ vim.api.nvim_set_keymap(
   { noremap = true }
 )
 
+-- copy to system clipboard
 vim.keymap.set("n", "<leader>y", "\"+y")
 vim.keymap.set("v", "<leader>y", "\"+y")
 vim.keymap.set("n", "<leader>Y", "\"+Y")

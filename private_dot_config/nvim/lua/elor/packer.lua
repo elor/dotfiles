@@ -28,7 +28,7 @@ require('packer').startup(function(use)
       -- Additional lua configuration, makes nvim stuff amazing
       'folke/neodev.nvim',
 
-      -- Autocompletion
+      -- Autocompletion - possible duplication with below?
       { 'hrsh7th/nvim-cmp' },
       { 'hrsh7th/cmp-buffer' },
       { 'hrsh7th/cmp-path' },
@@ -50,7 +50,7 @@ require('packer').startup(function(use)
     requires = "kyazdani42/nvim-web-devicons",
   }
 
-  use { -- Autocompletion
+  use { -- Autocompletion - possible duplication with above?
     'hrsh7th/nvim-cmp',
     requires = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
   }
@@ -95,9 +95,7 @@ require('packer').startup(function(use)
   -- Fuzzy Finder Algorithm which requires local dependencies to be built. Only load if `make` is available
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make', cond = vim.fn.executable 'make' == 1 }
 
-  -- Eriks stuff --
-  -- use 'ctrlpvim/ctrlp.vim'
-  -- use 'kien/rainbow_parentheses.vim'
+  -- Navigable history of changes
   use 'mbbill/undotree'
 
 
