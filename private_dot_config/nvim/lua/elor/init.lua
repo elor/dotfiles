@@ -248,6 +248,7 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
+require'lspconfig'.pyright.setup{}
 require'lspconfig'.hls.setup{}
 
 -- Turn on lsp status information
