@@ -74,7 +74,7 @@ vim.keymap.set('n', '<C-P>', require('telescope.builtin').git_files, { desc = 'S
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
   -- Add languages to be installed here that you want installed for treesitter
-  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'typescript', 'help', 'vim' },
+  ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'typescript', 'help', 'vim', 'haskell' },
 
   highlight = { enable = true },
   indent = { enable = true, disable = { 'python' } },
@@ -240,6 +240,8 @@ mason_lspconfig.setup_handlers {
     }
   end,
 }
+
+require'lspconfig'.hls.setup{}
 
 -- Turn on lsp status information
 require('fidget').setup()
