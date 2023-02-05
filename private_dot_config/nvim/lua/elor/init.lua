@@ -47,6 +47,13 @@ require('telescope').setup {
         ['<C-d>'] = false,
       },
     },
+    layout_config = {
+      horizontal = {
+        width = { padding = 2 },
+        height = { padding = 2 },
+      }
+      -- other layout configuration here
+    },
   },
 }
 
