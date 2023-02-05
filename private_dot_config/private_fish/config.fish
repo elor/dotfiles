@@ -1,6 +1,10 @@
 # no prepend-path since we're running old fish versions on some workstations :-(
 set PATH ~/.local/bin ~/.cargo/bin /sbin $PATH
 
+if [ -d ~/.cabal/bin ]
+  set PATH ~/.cabal/bin $PATH
+end
+
 which thefuck &>/dev/null && thefuck --alias | source
 
 # ssh aliases
