@@ -80,4 +80,6 @@ else
   setenv EDITOR (which nano)
 end
 
+alias tre tree
+
 setenv LC_CTYPE en_US.UTF-8
