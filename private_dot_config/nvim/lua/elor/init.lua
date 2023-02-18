@@ -54,6 +54,7 @@ require('telescope').setup {
       }
       -- other layout configuration here
     },
+    file_ignore_patterns = { 'node_modules', 'target', 'dist', 'build', 'vendor', 'venv', '.git' },
   },
 }
 
