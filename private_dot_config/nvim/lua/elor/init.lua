@@ -252,8 +252,13 @@ mason_lspconfig.setup_handlers {
   end,
 }
 
-require'lspconfig'.pyright.setup{}
-require'lspconfig'.hls.setup{}
+require 'lspconfig'.clangd.setup {
+  capabilities = {
+    offsetEncoding = 'utf-8',
+  },
+}
+require 'lspconfig'.pyright.setup {}
+require 'lspconfig'.hls.setup {}
 
 -- Turn on lsp status information
 require('fidget').setup()
