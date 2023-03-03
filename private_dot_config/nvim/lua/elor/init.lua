@@ -318,6 +318,11 @@ require("trouble").setup({
   height = 5,
 })
 
+require('illuminate').configure({
+  -- providers = { 'treesitter' },
+  delay = 10,
+})
+
 -- refactoring setup --
 require('refactoring').setup({})
 -- load refactoring Telescope extension

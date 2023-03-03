@@ -98,6 +98,8 @@ require('packer').startup(function(use)
   -- Navigable history of changes
   use 'mbbill/undotree'
 
+  -- highlight symbol under cursor
+  use 'RRethy/vim-illuminate'
 
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
