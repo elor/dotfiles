@@ -81,5 +81,6 @@ else
 end
 
 alias tre tree
+alias tls "tmux list-sessions"
 
 setenv LC_CTYPE en_US.UTF-8
