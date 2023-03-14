@@ -15,5 +15,4 @@ function copilot_what-the-shell
   end
 end
 
-alias 'copilot' 'copilot_what-the-shell';
 alias 'cop' 'copilot';
