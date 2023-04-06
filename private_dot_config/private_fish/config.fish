@@ -45,7 +45,7 @@ end
 if [ -f /opt/homebrew/anaconda3/bin/conda ]
   function conda
     functions -e conda
-    eval /opt/homebrew/anaconda3/bin/conda "shell.fish" "hook" $argv | source
+    eval /opt/homebrew/anaconda3/bin/conda "shell.fish" "hook" | source
     functions -e fish_right_prompt
     conda $argv
   end
