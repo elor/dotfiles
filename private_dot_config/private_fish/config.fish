@@ -29,7 +29,6 @@ function fisher_setup
     curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher
   end
   fisher install jorgebucaran/fisher
-  fisher install jorgebucaran/autopair.fish
   fisher install acomagu/fish-async-prompt
   fisher install jbonjean/re-search
   fisher install jethrokuan/fzf
