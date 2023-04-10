@@ -3,7 +3,7 @@ function cop # github copilot
   trap "rm -f $TMPFILE" EXIT;
 
   if /opt/homebrew/bin/github-copilot-cli what-the-shell "$argv" --shellout $TMPFILE
-    source $TMPFILE
+    bash $TMPFILE
   else
     return 1
   end
