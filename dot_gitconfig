@@ -3,7 +3,7 @@
 	email = erik@tuvero.de
 [core]
 	autocrlf = input
-	excludesfile = ~/.gitignore
+	excludesfile = /Users/elor/.gitignore
 
 [alias]
 	graph = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
