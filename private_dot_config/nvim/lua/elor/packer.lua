@@ -101,6 +101,15 @@ require('packer').startup(function(use)
   -- highlight symbol under cursor
   use 'RRethy/vim-illuminate'
 
+  -- UI for debugging with DAP
+  use {
+    "rcarriga/nvim-dap-ui",
+    requires = {
+      "mfussenegger/nvim-dap",
+      "folke/neodev.nvim",
+    }
+  }
+
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
   if has_plugins then
