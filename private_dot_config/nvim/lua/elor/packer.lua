@@ -101,6 +101,17 @@ require('packer').startup(function(use)
   -- highlight symbol under cursor
   use 'RRethy/vim-illuminate'
 
+  -- Test runner
+  use {
+    'nvim-neotest/neotest',
+    requires = {
+      'nvim-lua/plenary.nvim',
+      'nvim-treesitter/nvim-treesitter',
+      'antoinemadec/FixCursorHold.nvim'
+    }
+  }
+  use 'nvim-neotest/neotest-python'
+
   -- UI for debugging with DAP
   use {
     "rcarriga/nvim-dap-ui",
