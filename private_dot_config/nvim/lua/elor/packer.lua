@@ -121,6 +121,16 @@ require('packer').startup(function(use)
     }
   }
 
+  -- Javascript/Typescript debugging using vscode-js-debug
+  use {
+    { "mxsdev/nvim-dap-vscode-js" },
+    {
+      "microsoft/vscode-js-debug",
+      opt = true,
+      run = "npm install --legacy-peer-deps && npx gulp vsDebugServerBundle && mv dist out"
+    },
+  }
+
   -- Add custom plugins to packer from ~/.config/nvim/lua/custom/plugins.lua
   local has_plugins, plugins = pcall(require, 'custom.plugins')
   if has_plugins then

@@ -52,36 +52,92 @@ require("neodev").setup({
 
 -- Debugging via DAP
 local dap = require('dap')
-dap.adapters.python = {
-  type = 'executable';
-  command = '/Users/elor/Code/pydap/venv/bin/python',
-  args = { '-m', 'debugpy.adapter' };
-}
-local dap = require('dap')
+
+
+local DEBUGGER_PATH = vim.fn.stdpath "data" .. "/site/pack/packer/opt/vscode-js-debug"
+
+-- Python debugging
+dap.adapters.python = function(cb, config)
+  if config.request == 'attach' then
+    ---@diagnostic disable-next-line: undefined-field
+    local port = (config.connect or config).port
+    ---@diagnostic disable-next-line: undefined-field
+    local host = (config.connect or config).host or '127.0.0.1'
+    cb({
+      type = 'server',
+      port = assert(port, '`connect.port` is required for a python `attach` configuration'),
+      host = host,
+      options = {
+        source_filetype = 'python',
+      },
+    })
+  else
+    cb({
+      type = 'executable',
+      command = '/Users/elor/.pyenv/shims/python',
+      args = { '-m', 'debugpy.adapter' },
+      options = {
+        source_filetype = 'python',
+      },
+    })
+  end
+end
 dap.configurations.python = {
   {
-    -- The first three options are required by nvim-dap
-    type = 'python'; -- the type here established the link to the adapter definition: `dap.adapters.python`
-    request = 'launch';
-    name = "Launch file";
-
-    -- Options below are for debugpy, see https://github.com/microsoft/debugpy/wiki/Debug-configuration-settings for supported options
-
-    program = "${file}"; -- This configuration will launch the current file if used.
+    type = 'python',
+    request = 'launch',
+    name = 'Launch file',
+    -- Options for microsoft/debugpy, see docs there
+    program = '${file}',
     pythonPath = function()
-      -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
-      -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
-      -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
       local cwd = vim.fn.getcwd()
-      if vim.fn.executable(cwd .. '/venv/bin/python') == 1 then
-        return cwd .. '/venv/bin/python'
-      elseif vim.fn.executable(cwd .. '/.venv/bin/python') == 1 then
-        return cwd .. '/.venv/bin/python'
-      else
-        return '/usr/bin/python'
+      local pyenv = vim.fn.glob(cwd .. '/.python-version')
+      if pyenv ~= '' then
+        return '/Users/elor/.pyenv/shims/python'
       end
-    end;
+      return '/opt/homebrew/bin/python3'
+    end,
   },
+}
+
+-- Javascript debugging
+require("dap-vscode-js").setup {
+  node_path = "node",
+  debugger_path = DEBUGGER_PATH,
+  -- debugger_cmd = { "js-debug-adapter" },
+  adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "node-terminal", "pwa-extensionHost" }, -- which adapters to register in nvim-dap
+}
+
+dap.configurations.javascript = {
+  {
+    type = "pwa-node",
+    request = "launch",
+    name = "Launch file",
+    program = "${file}",
+    cwd = "${workspaceFolder}",
+  },
+  -- {
+  --   type = "pwa-node",
+  --   request = "attach",
+  --   name = "Attach",
+  --   processId = require("dap.utils").pick_process,
+  --   cwd = "${workspaceFolder}",
+  -- },
+  -- {
+  --   type = "pwa-node",
+  --   request = "launch",
+  --   name = "Debug Jest Tests",
+  --   -- trace = true, -- include debugger info
+  --   runtimeExecutable = "node",
+  --   runtimeArgs = {
+  --     "./node_modules/jest/bin/jest.js",
+  --     "--runInBand",
+  --   },
+  --   rootPath = "${workspaceFolder}",
+  --   cwd = "${workspaceFolder}",
+  --   console = "integratedTerminal",
+  --   internalConsoleOptions = "neverOpen",
+  -- },
 }
 
 -- [[ Configure Telescope ]]
@@ -90,11 +146,11 @@ require('telescope').setup {
   defaults = {
     mappings = {
       i = {
-            ['<C-u>'] = false,
-            ['<C-d>'] = require('telescope.actions').delete_buffer,
+        ['<C-u>'] = false,
+        ['<C-d>'] = require('telescope.actions').delete_buffer,
       },
       n = {
-            ['<C-d>'] = require('telescope.actions').delete_buffer,
+        ['<C-d>'] = require('telescope.actions').delete_buffer,
       },
     },
     layout_config = {
@@ -128,6 +184,18 @@ vim.keymap.set('n', '<leader>sk', require('telescope.builtin').keymaps, { desc =
 
 vim.keymap.set('n', '<C-P>', require('telescope.builtin').git_files, { desc = 'Search Git Files' })
 
+-- [[ Debugging Hotkeys ]]
+vim.keymap.set('n', '<F5>', require('dap').continue, { desc = 'Continue' })
+vim.keymap.set('n', '<F10>', require('dap').step_over, { desc = 'Step Over' })
+vim.keymap.set('n', '<F11>', require('dap').step_into, { desc = 'Step Into' })
+vim.keymap.set('n', '<F12>', require('dap').step_out, { desc = 'Step Out' })
+vim.keymap.set('n', '<F8>', require('dap').toggle_breakpoint, { desc = 'Toggle Breakpoint' })
+vim.keymap.set('n', '<leader>dr', require('dap').repl.open, { desc = 'Open REPL' })
+vim.keymap.set('n', '<leader>dl', require('dap').run_last, { desc = 'Run Last' })
+-- open dapui
+vim.keymap.set('n', '<leader>do', require('dapui').toggle, { desc = 'Open DapUI' })
+
+
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
 require('nvim-treesitter.configs').setup {
@@ -151,41 +219,41 @@ require('nvim-treesitter.configs').setup {
       lookahead = true, -- Automatically jump forward to textobj, similar to targets.vim
       keymaps = {
         -- You can use the capture groups defined in textobjects.scm
-            ['aa'] = '@parameter.outer',
-            ['ia'] = '@parameter.inner',
-            ['af'] = '@function.outer',
-            ['if'] = '@function.inner',
-            ['ac'] = '@class.outer',
-            ['ic'] = '@class.inner',
+        ['aa'] = '@parameter.outer',
+        ['ia'] = '@parameter.inner',
+        ['af'] = '@function.outer',
+        ['if'] = '@function.inner',
+        ['ac'] = '@class.outer',
+        ['ic'] = '@class.inner',
       },
     },
     move = {
       enable = true,
       set_jumps = true, -- whether to set jumps in the jumplist
       goto_next_start = {
-            [']m'] = '@function.outer',
-            [']]'] = '@class.outer',
+        [']m'] = '@function.outer',
+        [']]'] = '@class.outer',
       },
       goto_next_end = {
-            [']M'] = '@function.outer',
-            [']['] = '@class.outer',
+        [']M'] = '@function.outer',
+        [']['] = '@class.outer',
       },
       goto_previous_start = {
-            ['[m'] = '@function.outer',
-            ['[['] = '@class.outer',
+        ['[m'] = '@function.outer',
+        ['[['] = '@class.outer',
       },
       goto_previous_end = {
-            ['[M'] = '@function.outer',
-            ['[]'] = '@class.outer',
+        ['[M'] = '@function.outer',
+        ['[]'] = '@class.outer',
       },
     },
     swap = {
       enable = true,
       swap_next = {
-            ['<leader>a'] = '@parameter.inner',
+        ['<leader>a'] = '@parameter.inner',
       },
       swap_previous = {
-            ['<leader>A'] = '@parameter.inner',
+        ['<leader>A'] = '@parameter.inner',
       },
     },
   },
@@ -321,10 +389,10 @@ cmp.setup {
     end,
   },
   mapping = cmp.mapping.preset.insert {
-        ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-        ['<C-f>'] = cmp.mapping.scroll_docs(4),
-        ['<C-Space>'] = cmp.mapping.complete({}),
-        ['<CR>'] = cmp.mapping.confirm {
+    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete({}),
+    ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
       select = true,
     },
