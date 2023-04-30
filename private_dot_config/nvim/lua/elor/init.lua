@@ -325,19 +325,25 @@ end
 --
 --  Add any additional override configuration in the following tables. They will be passed to
 --  the `settings` field of the server config. You must look up that documentation yourself.
-local servers = {
+local lsp_server_settings = {
   -- clangd = {},
   -- gopls = {},
-  -- pyright = {},
+  pyright = {},
+  hls = {},
   -- rust_analyzer = {},
   -- tsserver = {},
-
   lua_ls = {
     Lua = {
       workspace = { checkThirdParty = false },
       telemetry = { enable = false },
     },
   },
+}
+
+local lsp_server_extra_capabilities = {
+  clangd = {
+    offsetEncoding = 'utf-8',
+  }
 }
 
 -- Setup neovim lua configuration
@@ -354,26 +360,33 @@ require('mason').setup()
 local mason_lspconfig = require 'mason-lspconfig'
 
 mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
+  ensure_installed = vim.tbl_keys(lsp_server_settings),
 }
+
+-- merges two dictionaries, e.g. for extending lsp capabilities
+local mergeDicts = function(...)
+  local result = {}
+  for _, dict in ipairs { ... } do
+    if dict == nil then
+      -- pass
+    else
+      for k, v in pairs(dict) do
+        result[k] = v
+      end
+    end
+  end
+  return result
+end
 
 mason_lspconfig.setup_handlers {
   function(server_name)
     require('lspconfig')[server_name].setup {
-      capabilities = capabilities,
+      capabilities = mergeDicts(capabilities, lsp_server_extra_capabilities[server_name]),
       on_attach = on_attach,
-      settings = servers[server_name],
+      settings = lsp_server_settings[server_name],
     }
   end,
 }
-
-require 'lspconfig'.clangd.setup {
-  capabilities = {
-    offsetEncoding = 'utf-8',
-  },
-}
-require 'lspconfig'.pyright.setup {}
-require 'lspconfig'.hls.setup {}
 
 -- Turn on lsp status information
 require('fidget').setup()
