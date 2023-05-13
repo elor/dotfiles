@@ -118,6 +118,13 @@ dap.configurations.javascript = {
   },
 }
 
+-- Rust debugging via lldb-vscode
+dap.adapters.lldb = {
+  type = 'executable',
+  command = '/opt/homebrew/opt/llvm/bin/lldb-vscode',
+  name = "lldb",
+}
+
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
 require('telescope').setup {
