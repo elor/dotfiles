@@ -494,5 +494,8 @@ vim.keymap.set("n", "<leader>Y", "\"+Y")
 -- exit terminal mode using <Esc>
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
+-- neotree
+vim.keymap.set("n", "<leader>fe", ":Neotree<CR>")
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
