@@ -107,7 +107,6 @@ require("dap-vscode-js").setup {
   -- debugger_cmd = { "js-debug-adapter" },
   adapters = { "pwa-node", "pwa-chrome", "pwa-msedge", "node-terminal", "pwa-extensionHost" }, -- which adapters to register in nvim-dap
 }
-
 dap.configurations.javascript = {
   {
     type = "pwa-node",
@@ -314,6 +313,7 @@ local on_attach = function(_, bufnr)
 
   nmap('gf', vim.lsp.buf.format, '[G]oto [F]ormat')
   nmap('<leader>gf', vim.lsp.buf.format, '[G]oto [F]ormat')
+
   nmap('<leader>u', vim.cmd.UndotreeToggle, '[U]ndotree Toggle')
 
   -- See `:help K` for why this keymap
@@ -496,6 +496,9 @@ vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
 -- neotree
 vim.keymap.set("n", "<leader>fe", ":Neotree<CR>")
+
+-- stay centered
+require('stay-centered')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
