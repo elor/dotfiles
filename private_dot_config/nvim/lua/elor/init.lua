@@ -46,9 +46,33 @@ require("symbols-outline").setup()
 require('dapui').setup()
 require('neotest').setup {
   adapters = {
-    require('neotest-python')
+    require('neotest-python'),
+    require('neotest-rust'),
   }
 }
+-- enable neotest diagnostics?
+vim.diagnostic.config({
+  enable = true,
+}, vim.api.nvim_create_namespace('neotest'))
+
+-- Neotest hotkey: <leader>rt --> run.run(vim.fn.expand('%'))
+RunTests = function()
+  -- run test on file
+  require("neotest").run.run(vim.fn.expand("%"))
+end
+local save_and_run_tests = function()
+  vim.cmd [[w]]
+  RunTests()
+end
+local display_test_output = function()
+  require("neotest").output.open()
+end
+vim.keymap.set('n', '<leader>rt', save_and_run_tests)
+vim.keymap.set('n', '<leader>ro', display_test_output)
+
+-- run 'run_tests' whenever the current buffer is saved
+-- TODO: use `vim.api.nvim_create_autocmd` instead
+-- vim.cmd [[autocmd BufWritePost * lua RunTests()]]
 
 -- DAP UI
 require("neodev").setup({

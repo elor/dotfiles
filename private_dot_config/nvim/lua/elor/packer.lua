@@ -111,6 +111,12 @@ require('packer').startup(function(use)
     }
   }
   use 'nvim-neotest/neotest-python'
+  use 'rouge8/neotest-rust'
+
+  -- use {
+  --   'JoBoCl/neotest-rust',
+  --   branch = 'patch-1',
+  -- }
 
   -- UI for debugging with DAP
   use {
