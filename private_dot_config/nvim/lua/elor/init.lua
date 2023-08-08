@@ -74,6 +74,47 @@ vim.keymap.set('n', '<leader>ro', display_test_output)
 -- TODO: use `vim.api.nvim_create_autocmd` instead
 -- vim.cmd [[autocmd BufWritePost * lua RunTests()]]
 
+-- rust-tools
+local rt = require('rust-tools')
+rt.setup {
+  server = {
+    inlay_hints = {
+      auto = true,
+      show_parameter_hints = true,
+      show_type_hints = true,
+    },
+    hover_actions = {
+      auto_focus = true,
+    },
+    tools = {
+      autoSetHints = true,
+      hover_with_actions = true,
+      runnables = {
+        use_telescope = true,
+      },
+    },
+    settings = {
+      ["rust-analyzer"] = {
+        checkOnSave = {
+          enable = true,
+          overrideCommand = {
+            "cargo",
+            "clippy",
+            "--all",
+            "--",
+            "-W",
+            "clippy::all"
+          },
+        }
+      }
+    }
+  }
+}
+
+rt.inlay_hints.enable()
+rt.hover_actions.hover_actions()
+
+
 -- DAP UI
 require("neodev").setup({
   library = { plugins = { "nvim-dap-ui" }, types = true },

@@ -178,6 +178,10 @@ require('packer').startup(function(use)
     }
   }
 
+
+  -- rust tools
+  use 'simrat39/rust-tools.nvim'
+
   --- symbols outline
   use 'simrat39/symbols-outline.nvim'
 
