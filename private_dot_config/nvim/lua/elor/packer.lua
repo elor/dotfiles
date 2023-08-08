@@ -178,6 +178,8 @@ require('packer').startup(function(use)
     }
   }
 
+  -- my first neovim package :-)
+  -- use "/Users/elor/Code/my-first-neovim-package"
 
   -- rust tools
   use 'simrat39/rust-tools.nvim'
