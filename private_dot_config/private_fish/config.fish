@@ -9,7 +9,15 @@ which thefuck &>/dev/null && thefuck --alias | source
 
 # ssh aliases
 function ssk; ssh enssim $argv; end
-function ssm; ssh mainsim $argv; end
+
+function ssm; 
+  if test -z $argv
+    ssh mainsim -t fish
+  else
+    ssh mainsim $argv
+  end
+end
+
 function sst; ssh mainsimts1 $argv; end
 function ssw; ssh mainsimweb $argv; end
 function ssp; ssh simpc17 $argv; end
