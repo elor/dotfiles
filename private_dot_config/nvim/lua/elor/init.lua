@@ -406,7 +406,11 @@ local on_attach = function(_, bufnr)
   nmap('gf', vim.lsp.buf.format, '[G]oto [F]ormat')
   nmap('<leader>gf', vim.lsp.buf.format, '[G]oto [F]ormat')
 
-  nmap('<leader>u', vim.cmd.UndotreeToggle, '[U]ndotree Toggle')
+  nmap('<leader>gu', function()
+    vim.cmd('UndotreeToggle')
+    vim.cmd('UndotreeFocus')
+  end, '[G]oto [U]ndoTree')
+
   nmap('<leader>go', function()
     -- remember current buffer, in order to switch to it later
     local current_bufnr = vim.api.nvim_get_current_buf()
