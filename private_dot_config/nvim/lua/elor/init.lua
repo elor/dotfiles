@@ -209,7 +209,39 @@ dap.configurations.cpp = {
 }
 
 dap.configurations.c = dap.configurations.cpp
-dap.configurations.rust = dap.configurations.cpp
+
+dap.configurations.rust = {
+  {
+    name = 'Launch',
+    type = 'lldb',
+    request = 'launch',
+    program = function()
+      print('Rust debugging: Getting debug binary path from cargo')
+
+      -- get json metadata from cargo metadata
+      local cargo_metadata = vim.fn.system('cargo metadata --format-version 1')
+      local cargo_metadata_json = vim.fn.json_decode(cargo_metadata)
+      local target_directory = cargo_metadata_json['target_directory']                   -- need a nil check
+      local workspace_default_members = cargo_metadata_json['workspace_default_members'] -- need a nil check
+      -- workspace_default_members format: "{binary} {version} (path+file://{abs_path_to_cargo_toml_directory})"
+      local binary_name = vim.fn.split(workspace_default_members[1], ' ')[1]
+
+      -- output binary path for user
+      local binary_path = target_directory .. '/debug/' .. binary_name
+
+      print('Rust debugging: Compiling binary: ' .. binary_name)
+      -- compile binary
+      vim.fn.system('cargo build')
+
+      print('Rust debugging: Compiled. Happy Debugging')
+
+      return binary_path
+    end,
+    cwd = '${workspaceFolder}',
+    stopOnEntry = false,
+    args = {},
+  },
+}
 
 -- [[ Configure Telescope ]]
 -- See `:help telescope` and `:help telescope.setup()`
