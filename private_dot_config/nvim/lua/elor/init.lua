@@ -300,6 +300,9 @@ vim.keymap.set('n', '<leader>dl', require('dap').run_last, { desc = 'Run Last' }
 -- open dapui
 vim.keymap.set('n', '<leader>do', require('dapui').toggle, { desc = 'Open DapUI for Debugging' })
 
+-- zoom in and out of tabs
+vim.keymap.set("n", "<leader>zi", ":tab split<CR>", { desc = 'Zoom into current tab' })
+vim.keymap.set("n", "<leader>zo", ":tab close<CR>", { desc = 'Zoom out of current tab' })
 
 -- [[ Configure Treesitter ]]
 -- See `:help nvim-treesitter`
