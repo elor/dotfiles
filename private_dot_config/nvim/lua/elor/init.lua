@@ -604,5 +604,8 @@ vim.keymap.set("n", "<leader>fe", ":Neotree<CR>")
 -- stay centered
 require('stay-centered')
 
+-- require('my-first-neovim-package')
+-- my_first_neovim_package()
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
