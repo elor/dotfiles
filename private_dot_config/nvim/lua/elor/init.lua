@@ -288,10 +288,12 @@ vim.keymap.set('n', '<leader>sk', require('telescope.builtin').keymaps, { desc =
 vim.keymap.set('n', '<C-P>', require('telescope.builtin').git_files, { desc = 'Search Git Files' })
 
 -- [[ Debugging Hotkeys ]]
-vim.keymap.set('n', '<F5>', require('dap').continue, { desc = 'Continue' })
-vim.keymap.set('n', '<F10>', require('dap').step_over, { desc = 'Step Over' })
-vim.keymap.set('n', '<F11>', require('dap').step_into, { desc = 'Step Into' })
-vim.keymap.set('n', '<F12>', require('dap').step_out, { desc = 'Step Out' })
+vim.keymap.set('n', '<F5>', require('dap').continue, { desc = 'Debugging: Continue, or Start' })
+vim.keymap.set('n', '<F6>', function() require('dap').pause(1) end, { desc = 'Debugging: Pause thread 1' })
+vim.keymap.set('n', '<F10>', require('dap').step_over, { desc = 'Debugging: Step Over' })
+vim.keymap.set('n', '<F11>', require('dap').step_into, { desc = 'Debugging: Step Into' })
+vim.keymap.set('n', '<F12>', require('dap').step_out, { desc = 'Debugging: Step Out' })
+vim.keymap.set('n', '<F2>', require('dap').close, { desc = 'Debugging: Stop, and Close' })
 vim.keymap.set('n', '<F8>', require('dap').toggle_breakpoint, { desc = 'Toggle Breakpoint' })
 vim.keymap.set('n', '<leader>dr', require('dap').repl.open, { desc = 'Open REPL' })
 vim.keymap.set('n', '<leader>dl', require('dap').run_last, { desc = 'Run Last' })
