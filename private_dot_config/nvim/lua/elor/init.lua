@@ -298,7 +298,7 @@ vim.keymap.set('n', '<F8>', require('dap').toggle_breakpoint, { desc = 'Toggle B
 vim.keymap.set('n', '<leader>dr', require('dap').repl.open, { desc = 'Open REPL' })
 vim.keymap.set('n', '<leader>dl', require('dap').run_last, { desc = 'Run Last' })
 -- open dapui
-vim.keymap.set('n', '<leader>do', require('dapui').toggle, { desc = 'Open DapUI' })
+vim.keymap.set('n', '<leader>do', require('dapui').toggle, { desc = 'Open DapUI for Debugging' })
 
 
 -- [[ Configure Treesitter ]]
