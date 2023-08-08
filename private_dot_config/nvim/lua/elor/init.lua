@@ -3,6 +3,8 @@ require("elor.settings")
 require("elor.keymap")
 require("elor.yankhighlight")
 
+-- shortcut: :PS -> :PackSync
+vim.cmd [[command! PS PackerSync]]
 
 -- Set lualine as statusline
 -- See `:help lualine.txt`
