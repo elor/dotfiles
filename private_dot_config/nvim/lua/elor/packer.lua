@@ -169,6 +169,9 @@ require('packer').startup(function(use)
     }
   }
 
+  --- symbols outline
+  use 'simrat39/symbols-outline.nvim'
+
   if is_bootstrap then
     require('packer').sync()
   end

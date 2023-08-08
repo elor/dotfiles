@@ -39,6 +39,9 @@ require('gitsigns').setup {
   },
 }
 
+-- SymbolsOutline
+require("symbols-outline").setup()
+
 -- Neotest
 require('dapui').setup()
 require('neotest').setup {
@@ -317,6 +320,14 @@ local on_attach = function(_, bufnr)
   nmap('<leader>gf', vim.lsp.buf.format, '[G]oto [F]ormat')
 
   nmap('<leader>u', vim.cmd.UndotreeToggle, '[U]ndotree Toggle')
+  nmap('<leader>go', function()
+    -- remember current buffer, in order to switch to it later
+    local current_bufnr = vim.api.nvim_get_current_buf()
+    vim.cmd('silent! SymbolsOutlineClose')
+    vim.cmd('SymbolsOutlineOpen')
+    -- switch back to remembered buffer
+    vim.api.nvim_set_current_buf(current_bufnr)
+  end, '[G]oto [O]utline')
 
   -- See `:help K` for why this keymap
   nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
