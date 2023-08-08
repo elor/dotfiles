@@ -91,3 +91,7 @@ alias tre tree
 alias tls "tmux list-sessions"
 
 setenv LC_CTYPE en_US.UTF-8
+
+if status --is-interactive
+  setenv SHELL (which fish)
+end
