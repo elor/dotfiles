@@ -566,7 +566,7 @@ require("trouble").setup({
   auto_close = false,
   auto_preview = true,
   auto_fold = false,
-  height = 5,
+  height = 7,
 })
 
 require('illuminate').configure({
