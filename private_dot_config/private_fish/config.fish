@@ -7,9 +7,6 @@ end
 
 which thefuck &>/dev/null && thefuck --alias | source
 
-# ssh aliases
-function ssk; ssh enssim $argv; end
-
 function ssm; 
   if test -z $argv
     ssh mainsim -t fish
@@ -18,12 +15,11 @@ function ssm;
   end
 end
 
-function sst; ssh mainsimts1 $argv; end
-function ssw; ssh mainsimweb $argv; end
-function ssp; ssh simpc17 $argv; end
-function sslm; ssh localmainsim $argv; end
+abbr sst ssh mainsimts1
+abbr ssw ssh mainsimweb
+abbr sslm ssh localmainsim
 
-alias lg=lazygit
+abbr lg lazygit
 
 function explorer; explorer.exe $argv; end
 set DISPLAY :0.0
@@ -68,9 +64,9 @@ end
 [ -s /opt/ohpc/admin/lmod/lmod/init/fish ] && source /opt/ohpc/admin/lmod/lmod/init/fish
 
 if which lsd &>/dev/null
-  function ls; lsd $argv; end
-  function ll; lsd -l $argv; end
-  function la; lsd -la $argv; end
+  abbr ls lsd
+  abbr ll lsd -l
+  abbr la lsd -la
 end
 
 set LANG en_US.UTF-8
@@ -87,8 +83,9 @@ else
   setenv EDITOR (which nano)
 end
 
-alias tre tree
-alias tls "tmux list-sessions"
+abbr tre tree
+abbr tls "tmux list-sessions"
+abbr clg chezmoi git lazy
 
 setenv LC_CTYPE en_US.UTF-8
 
