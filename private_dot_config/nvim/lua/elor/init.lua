@@ -218,26 +218,22 @@ dap.configurations.rust = {
     type = 'lldb',
     request = 'launch',
     program = function()
-      print('Rust debugging: Getting debug binary path from cargo')
+      print('Rust debugging: Compiling tests')
+      local test_build_json = vim.fn.system('cargo test --quiet --message-format=json --no-run')
 
-      -- get json metadata from cargo metadata
-      local cargo_metadata = vim.fn.system('cargo metadata --format-version 1')
-      local cargo_metadata_json = vim.fn.json_decode(cargo_metadata)
-      local target_directory = cargo_metadata_json['target_directory']                   -- need a nil check
-      local workspace_default_members = cargo_metadata_json['workspace_default_members'] -- need a nil check
-      -- workspace_default_members format: "{binary} {version} (path+file://{abs_path_to_cargo_toml_directory})"
-      local binary_name = vim.fn.split(workspace_default_members[1], ' ')[1]
+      print('Rust debugging: Finding test binary path')
 
-      -- output binary path for user
-      local binary_path = target_directory .. '/debug/' .. binary_name
+      for line in test_build_json:gmatch("[^\r\n]+") do
+        local decoded_line = vim.fn.json_decode(line)
+        local path = decoded_line['executable']
+        -- if path is a string, and an executable file exists at that paths
+        if path ~= nil and vim.fn.filereadable(path) == 1 then
+          print('Rust debugging: Executable found: ' .. path)
+          return path
+        end
+      end
 
-      print('Rust debugging: Compiling binary: ' .. binary_name)
-      -- compile binary
-      vim.fn.system('cargo build')
-
-      print('Rust debugging: Compiled. Happy Debugging')
-
-      return binary_path
+      print('Rust debugging: Could not find test binary path')
     end,
     cwd = '${workspaceFolder}',
     stopOnEntry = false,
