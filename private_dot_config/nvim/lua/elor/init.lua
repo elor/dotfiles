@@ -194,19 +194,40 @@ dap.adapters.lldb = {
   name = "lldb",
 }
 
+local choose_cpp_program_and_args = function()
+  -- choose args
+  local program = vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
+
+  if vim.fn.executable(program) == 0 then
+    print(program .. ' is not executable; aborting')
+    return
+  end
+
+  -- choose args
+  local args_str = vim.fn.input('Arguments: ')
+  local args = {}
+  if not args_str ~= '' then
+    args = vim.split(args_str, ' ')
+  end
+
+  return { program = program, args = args }
+end
+
 dap.configurations.cpp = {
   {
     name = 'Launch',
     type = 'lldb',
     request = 'launch',
     program = function()
-      local program = vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
-      dap.configurations.cpp[1].program = program
-      return program
+      local program_and_args = choose_cpp_program_and_args()
+      return program_and_args.program
     end,
     cwd = '${workspaceFolder}',
     stopOnEntry = false,
-    args = {},
+    args = function()
+      local program_and_args = choose_cpp_program_and_args()
+      return program_and_args.args
+    end,
   },
 }
 
