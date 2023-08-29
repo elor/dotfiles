@@ -579,6 +579,7 @@ cmp.setup {
 
 
 require("trouble").setup({
+  position = "right",
   auto_open = false,
   auto_close = false,
   auto_preview = true,
