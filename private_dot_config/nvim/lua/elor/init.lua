@@ -215,7 +215,7 @@ end
 
 dap.configurations.cpp = {
   {
-    name = 'Launch',
+    name = 'Choose and Launch',
     type = 'lldb',
     request = 'launch',
     program = function()
