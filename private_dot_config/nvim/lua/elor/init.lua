@@ -640,6 +640,9 @@ vim.keymap.set("n", "<leader>y", "\"+y")
 vim.keymap.set("v", "<leader>y", "\"+y")
 vim.keymap.set("n", "<leader>Y", "\"+Y")
 
+vim.keymap.set('n', '<leader>sc', "ggVG:Chat ", { desc = '[C]ode Chat (GPT)' })
+vim.keymap.set('v', '<leader>sc', ":Chat ", { desc = '[C]ode Chat (GPT)' })
+
 -- exit terminal mode using <Esc>
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 

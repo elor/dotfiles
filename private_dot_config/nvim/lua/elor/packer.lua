@@ -187,6 +187,18 @@ require('packer').startup(function(use)
   --- symbols outline
   use 'simrat39/symbols-outline.nvim'
 
+  --- GPT Code Chat
+  use({
+    "dpayne/CodeGPT.nvim",
+    requires = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+    },
+    config = function()
+      require("codegpt.config")
+    end
+  })
+
   if is_bootstrap then
     require('packer').sync()
   end
