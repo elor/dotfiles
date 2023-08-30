@@ -219,13 +219,40 @@ dap.configurations.cpp = {
     type = 'lldb',
     request = 'launch',
     program = function()
-      local program_and_args = choose_cpp_program_and_args()
-      return program_and_args.program
+      -- args is evaluated first, so this would be a duplicate.
+      -- Just use the last cpp[] entry
+      return dap.configurations.cpp[#dap.configurations.cpp].program
+      -- local program_and_args = choose_cpp_program_and_args()
+      -- return program_and_args.program
     end,
     cwd = '${workspaceFolder}',
     stopOnEntry = false,
     args = function()
       local program_and_args = choose_cpp_program_and_args()
+
+      -- nil checks
+      if program_and_args == nil then
+        print('Error when choosing program and args; aborting')
+        return
+      end
+      if program_and_args.program == nil then
+        print('No program chosen; aborting')
+        return
+      end
+      if program_and_args.args == nil then
+        program_and_args.args = {}
+      end
+
+      table.insert(dap.configurations.cpp, {
+        name = 'Launch ' .. program_and_args.program .. ' ' .. table.concat(program_and_args.args, ' '),
+        type = 'lldb',
+        request = 'launch',
+        program = program_and_args.program,
+        cwd = '${workspaceFolder}',
+        stopOnEntry = false,
+        args = program_and_args.args,
+      })
+
       return program_and_args.args
     end,
   },
