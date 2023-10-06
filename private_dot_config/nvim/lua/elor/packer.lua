@@ -166,8 +166,7 @@ require('packer').startup(function(use)
     plugins(use)
   end
 
-  -- neo-tree
-
+  -- neo-tree: file explorer
   use {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v2.x",
