@@ -649,6 +649,9 @@ vim.keymap.set("n", "<leader>fe", ":Neotree<CR>")
 -- stay centered
 require('stay-centered')
 
+-- playlist files are json
+vim.cmd([[autocmd BufNewFile,BufRead *.playlist setfiletype json]])
+
 -- require('my-first-neovim-package')
 -- my_first_neovim_package()
 
