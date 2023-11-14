@@ -88,6 +88,8 @@ abbr tls "tmux list-sessions"
 abbr tns "tmux new-session -t 0"
 abbr clg chezmoi git lazy
 
+abbr sshpass "sshpass -f ~/.ssh/sshpass ssh"
+
 setenv LC_CTYPE en_US.UTF-8
 
 if status --is-interactive
