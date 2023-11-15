@@ -20,6 +20,7 @@ abbr ssw ssh mainsimweb
 abbr sslm ssh localmainsim
 
 abbr lg lazygit
+abbr gp git pull
 
 function explorer; explorer.exe $argv; end
 set DISPLAY :0.0
