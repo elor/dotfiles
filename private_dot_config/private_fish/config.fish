@@ -93,6 +93,10 @@ abbr sshpass "sshpass -f ~/.ssh/sshpass ssh"
 
 abbr bubu "brew update && brew upgrade"
 
+abbr gcs "gh copilot suggest -t shell"
+abbr !! "gh copilot suggest -t shell"
+abbr gce "gh copilot explain"
+
 setenv LC_CTYPE en_US.UTF-8
 
 if status --is-interactive
