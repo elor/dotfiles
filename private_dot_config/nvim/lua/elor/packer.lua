@@ -180,6 +180,10 @@ require('packer').startup(function(use)
   -- my first neovim package :-)
   -- use "/Users/elor/Code/my-first-neovim-package"
 
+  -- breadcrumbs
+  use 'SmiteshP/nvim-navic'
+  use 'LunarVim/breadcrumbs.nvim'
+
   -- rust tools
   use 'simrat39/rust-tools.nvim'
 

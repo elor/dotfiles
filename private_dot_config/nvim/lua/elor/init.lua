@@ -646,6 +646,14 @@ vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 -- neotree
 vim.keymap.set("n", "<leader>fe", ":Neotree reveal<CR>")
 
+-- breadcrumbs
+require("nvim-navic").setup {
+  lsp = {
+    auto_attach = true,
+  },
+}
+require("breadcrumbs").setup()
+
 -- stay centered
 require('stay-centered')
 
