@@ -644,7 +644,7 @@ vim.keymap.set('v', '<leader>sc', ":Chat ", { desc = '[C]ode Chat (GPT)' })
 vim.keymap.set("t", "<Esc>", "<C-\\><C-n>")
 
 -- neotree
-vim.keymap.set("n", "<leader>fe", ":Neotree<CR>")
+vim.keymap.set("n", "<leader>fe", ":Neotree reveal<CR>")
 
 -- stay centered
 require('stay-centered')
