@@ -103,6 +103,8 @@ abbr gce "gh copilot explain"
 
 abbr cmbt "cmake -B build/ -S . && cmake --build build/ --parallel && ctest --test-dir build/ || cat build/Testing/Temporary/LastTest.log"
 
+abbr kssh "kitty +kitten ssh"
+
 setenv LC_CTYPE en_US.UTF-8
 
 if status --is-interactive
