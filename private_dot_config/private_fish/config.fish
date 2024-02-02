@@ -35,21 +35,18 @@ function fisher_setup
     fisher install jethrokuan/fzf
 end
 
-if [ -f /beegfs-home/modules/conda/bin/conda ]
-    function conda
-        functions -e conda
+function conda
+    functions -e conda
+    if [ -f /beegfs-home/modules/conda/bin/conda ]
         eval /beegfs-home/modules/conda/bin/conda "shell.fish" hook | source
-        conda $argv
-    end
-end
-
-if [ -f /opt/homebrew/anaconda3/bin/conda ]
-    function conda
-        functions -e conda
+    else if [ -f /opt/homebrew/anaconda3/bin
         eval /opt/homebrew/anaconda3/bin/conda "shell.fish" hook | source
-        functions -e fish_right_prompt
-        conda $argv
+    else
+        echo "No conda found"
+        return
     end
+
+    conda $argv
 end
 
 function spack
