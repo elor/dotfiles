@@ -5,7 +5,6 @@ if [ -d ~/.cabal/bin ]
     set PATH ~/.cabal/bin $PATH
 end
 
-which thefuck &>/dev/null && thefuck --alias | source
 
 function ssm
     if test -z $argv
