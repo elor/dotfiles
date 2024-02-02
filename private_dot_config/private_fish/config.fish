@@ -78,6 +78,7 @@ else
 end
 
 abbr tre tree
+abbr tma "tmux new-session -t tma"
 abbr clg chezmoi git lazy
 abbr cgl chezmoi git lazy
 
