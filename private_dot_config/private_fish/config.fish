@@ -78,8 +78,6 @@ else
 end
 
 abbr tre tree
-abbr tls "tmux list-sessions"
-abbr tns "tmux new-session -t 0"
 abbr clg chezmoi git lazy
 abbr cgl chezmoi git lazy
 
