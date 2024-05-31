@@ -2,7 +2,7 @@
 set PATH ~/.local/bin ~/.cargo/bin /sbin $PATH
 
 function ssm
-    if test -z $argv
+    if test -z "$argv"
         ssh mainsim -t fish
     else
         ssh mainsim $argv
