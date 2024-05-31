@@ -9,6 +9,22 @@ function ssm
     end
 end
 
+function ssn
+    if test -z "$argv"
+        ssh nextsim -t tmux
+    else
+        ssh nextsim $argv
+    end
+end
+
+function ssrn
+    if test -z "$argv"
+        ssh root@nextsim -t tmux
+    else
+        ssh root@nextsim $argv
+    end
+end
+
 abbr sst ssh mainsimts1
 abbr ssw ssh mainsimweb
 abbr sslm ssh localmainsim
