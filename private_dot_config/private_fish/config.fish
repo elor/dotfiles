@@ -3,7 +3,7 @@ set PATH ~/.local/bin ~/.cargo/bin /sbin $PATH
 
 function ssm
     if test -z "$argv"
-        ssh mainsim -t fish
+        ssh mainsim -t tmux
     else
         ssh mainsim $argv
     end
