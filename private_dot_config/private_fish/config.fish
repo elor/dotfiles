@@ -49,7 +49,7 @@ function conda
     functions -e conda
     if [ -f /beegfs-home/modules/conda/bin/conda ]
         eval /beegfs-home/modules/conda/bin/conda "shell.fish" hook | source
-    else if [ -f /opt/homebrew/anaconda3/bin
+    else if [ -f /opt/homebrew/anaconda3/bin ]
         eval /opt/homebrew/anaconda3/bin/conda "shell.fish" hook | source
     else
         echo "No conda found"
