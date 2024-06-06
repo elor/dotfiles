@@ -83,12 +83,10 @@ set -U FZF_DEFAULT_OPTS "--preview 'string match -rq \"[\\\"\\'*]\" {} && exit 1
 
 if which nvim &>/dev/null
     setenv EDITOR (which nvim)
-    abbr vim nvim
 else if which vim &>/dev/null
     setenv EDITOR (which vim)
 else
     setenv EDITOR (which nano)
-    abbr vim nano
 end
 
 abbr tre tree
