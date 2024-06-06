@@ -47,11 +47,7 @@ end
 
 function conda
     functions -e conda
-    if [ -f /beegfs-home/modules/conda/bin/conda ]
-        eval /beegfs-home/modules/conda/bin/conda "shell.fish" hook | source
-    else if [ -f /opt/homebrew/anaconda3/bin ]
-        eval /opt/homebrew/anaconda3/bin/conda "shell.fish" hook | source
-    else if which conda &>/dev/null
+    if which conda &>/dev/null
         eval conda "shell.fish" hook | source
     else
         echo "No conda found"
@@ -59,12 +55,6 @@ function conda
     end
 
     conda $argv
-end
-
-function spack
-    functions -e spack
-    source ~/spack/share/spack/setup-env.fish
-    spack $argv
 end
 
 [ -s /opt/ohpc/admin/lmod/lmod/init/fish ] && source /opt/ohpc/admin/lmod/lmod/init/fish
