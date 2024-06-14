@@ -43,6 +43,7 @@ function fisher_setup
     fisher install jorgebucaran/fisher
     fisher install jbonjean/re-search
     fisher install jethrokuan/fzf
+    fisher install zzhaolei/transient.fish
 end
 
 function conda
