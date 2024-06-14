@@ -57,11 +57,6 @@ abbr cgl chezmoi git lazy
 
 abbr bubu "brew update && brew upgrade"
 
-abbr gcs "gh copilot suggest -t shell"
-abbr !! "gh copilot suggest -t shell"
-abbr '??' "gh copilot suggest -t shell"
-abbr gce "gh copilot explain"
-
 abbr kssh "kitty +kitten ssh"
 
 abbr tldl "tldr -p linux"
