@@ -1,34 +1,6 @@
 # no prepend-path since we're running old fish versions on some workstations :-(
 set PATH ~/.local/bin ~/.cargo/bin /sbin $PATH
 
-function ssm
-    if test -z "$argv"
-        ssh mainsim -t tmux
-    else
-        ssh mainsim $argv
-    end
-end
-
-function ssn
-    if test -z "$argv"
-        ssh nextsim -t tmux
-    else
-        ssh nextsim $argv
-    end
-end
-
-function ssrn
-    if test -z "$argv"
-        ssh root@nextsim -t tmux
-    else
-        ssh root@nextsim $argv
-    end
-end
-
-abbr sst ssh mainsimts1
-abbr ssw ssh mainsimweb
-abbr sslm ssh localmainsim
-
 abbr lg lazygit
 abbr gp git pull
 
@@ -58,8 +30,6 @@ function conda
     conda $argv
 end
 
-[ -s /opt/ohpc/admin/lmod/lmod/init/fish ] && source /opt/ohpc/admin/lmod/lmod/init/fish
-
 if which lsd &>/dev/null
     abbr ls lsd
     abbr ll lsd -l
@@ -85,16 +55,12 @@ abbr tma "tmux new-session -t tma"
 abbr clg chezmoi git lazy
 abbr cgl chezmoi git lazy
 
-abbr sshpass "sshpass -f ~/.ssh/sshpass ssh"
-
 abbr bubu "brew update && brew upgrade"
 
 abbr gcs "gh copilot suggest -t shell"
 abbr !! "gh copilot suggest -t shell"
 abbr '??' "gh copilot suggest -t shell"
 abbr gce "gh copilot explain"
-
-abbr cmbt "cmake -B build/ -S . && cmake --build build/ --parallel && ctest --test-dir build/ || cat build/Testing/Temporary/LastTest.log"
 
 abbr kssh "kitty +kitten ssh"
 
