@@ -2,7 +2,6 @@
 set PATH ~/.local/bin ~/.cargo/bin /sbin $PATH
 
 abbr lg lazygit
-abbr gp git pull
 
 set TZ Europe/Berlin
 
@@ -51,7 +50,6 @@ else
 end
 
 abbr tre tree
-abbr tma "tmux new-session -t tma"
 abbr clg chezmoi git lazy
 abbr cgl chezmoi git lazy
 
