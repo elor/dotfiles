@@ -10,11 +10,11 @@ function transient_prompt_func --description 'Write out the left prompt'
         set suffix '#'
     end
 
-    echo -en (set_color brblack)"["(date "+%H:%M")"] "(set_color $color)"$status_text$suffix "(set_color normal)
+    echo -en (set_color $color)"$status_text$suffix "(set_color normal)
 end
 
 function transient_rprompt_func --description 'Write out the right prompt'
-    echo -en (set_color brblack)(prompt_pwd)(set_color normal)
+    echo -en (set_color brblack)(prompt_pwd)" ["(date "+%H:%M")"]"(set_color normal)
 end
 
 function transient_elor_fish_prompt
@@ -54,4 +54,8 @@ function fish_prompt --description 'Write out the prompt'
     transient_elor_fish_prompt
     echo
     transient_prompt_func
+end
+
+function fish_right_prompt --description 'Write out the right prompt'
+    echo -en (set_color brblack)"["(date "+%H:%M")"]"
 end
