@@ -5,7 +5,7 @@
   ],
   "rules": [
     {
-      "description": "Skim.app: [◀ ▶ j k] to ⌘ + [◀ ▶], Chrome, Word: [◀ ▶] to Page [▼ ▲], Feedly: [◀ ▶ b] to Page [j k v]",
+      "description": "Skim.app: [◀ ▶ j k] to ⌘ + [◀ ▶], Chrome, Safari, Word: [◀ ▶] to Page [▼ ▲], Feedly: [◀ ▶ b] to Page [j k v]",
       "manipulators": [
         {
           "conditions": [
@@ -101,6 +101,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.google\\.Chrome",
+                "^com\\.apple\\.Safari",
                 "^com\\.microsoft\\.Word$"
               ]
             },
@@ -137,6 +138,7 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.google\\.Chrome",
+                "^com\\.apple\\.Safari",
                 "^com\\.microsoft\\.Word$"
               ]
             },
