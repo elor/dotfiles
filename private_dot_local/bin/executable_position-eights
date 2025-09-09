@@ -1,0 +1,129 @@
+#!/bin/bash
+
+read width height xorigin yorigin <<<"$(external-display-parameters)"
+selected_eight=$1
+
+menubar_height=24
+
+let height=height-menubar_height
+let yorigin=yorigin+menubar_height
+
+let quarter_width=width/4
+let half_width=width/2
+let quarter_height=height/4
+let half_height=height/2
+
+# If screen is wider than tall (or equal), use this positioning:
+# 1 2 3 4
+# 5 6 7 8
+#
+# If screen is taller than wide, use this positioning:
+# 1 2
+# 3 4
+# 5 6
+# 7 8
+
+if ((width >= height)); then
+  window_width=$quarter_width
+  window_height=$half_height
+
+  case $selected_eight in
+  1)
+    x=$xorigin
+    y=$yorigin
+    ;;
+  2)
+    x=$((xorigin + window_width))
+    y=$yorigin
+    ;;
+  3)
+    x=$((xorigin + 2 * window_width))
+    y=$yorigin
+    ;;
+  4)
+    x=$((xorigin + 3 * window_width))
+    y=$yorigin
+    ;;
+  5)
+    x=$xorigin
+    y=$((yorigin + window_height))
+    ;;
+  6)
+    x=$((xorigin + window_width))
+    y=$((yorigin + window_height))
+    ;;
+  7)
+    x=$((xorigin + 2 * window_width))
+    y=$((yorigin + window_height))
+    ;;
+  8)
+    x=$((xorigin + 3 * window_width))
+    y=$((yorigin + window_height))
+    ;;
+  *)
+    echo "Invalid selection. Choose a number between 1 and 8."
+    exit 1
+    ;;
+  esac
+else
+  window_width=$half_width
+  window_height=$quarter_height
+
+  case $selected_eight in
+  1)
+    x=$xorigin
+    y=$yorigin
+    ;;
+  2)
+    x=$((xorigin + window_width))
+    y=$yorigin
+    ;;
+  3)
+    x=$xorigin
+    y=$((yorigin + window_height))
+    ;;
+  4)
+    x=$((xorigin + window_width))
+    y=$((yorigin + window_height))
+    ;;
+  5)
+    x=$xorigin
+    y=$((yorigin + 2 * window_height))
+    ;;
+  6)
+    x=$((xorigin + window_width))
+    y=$((yorigin + 2 * window_height))
+    ;;
+  7)
+    x=$xorigin
+    y=$((yorigin + 3 * window_height))
+    ;;
+  8)
+    x=$((xorigin + window_width))
+    y=$((yorigin + 3 * window_height))
+    ;;
+  *)
+    echo "Invalid selection. Choose a number between 1 and 8."
+    exit 1
+    ;;
+  esac
+fi
+
+command=${2:-all}
+case $command in
+all)
+  echo "$window_width $window_height $x $y"
+  ;;
+x)
+  echo $x
+  ;;
+y)
+  echo $y
+  ;;
+w)
+  echo $window_width
+  ;;
+h)
+  echo $window_height
+  ;;
+esac

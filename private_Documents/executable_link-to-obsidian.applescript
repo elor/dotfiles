@@ -34,6 +34,14 @@ tell application "System Events"
       set senderName to extract name from sender of theMessage without email
       set itemURL to "message://" & "%3c" & messageid & "%3e"
       set linkText to "[✉️ " & messagesubject & "](" & itemURL & ")"
+
+      -- Parse sender name
+      if senderName contains "," then
+        set lastname to word 1 of senderName
+        set firstname to text ((offset of "," in senderName) + 2) thru -1 of senderName
+        set senderName to trim_text(firstname) & " " & trim_text(lastname)
+      end if
+
       set senderText to "[[" & senderName & "]]"
 
       set the clipboard to linkText & " von " & senderText
@@ -44,3 +52,7 @@ tell application "System Events"
   keystroke "v" using command down
 end tell
 
+on trim_text(theText)
+  set theText to do shell script "echo \"" & theText & "\" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//'"
+  return theText
+end trim_text
