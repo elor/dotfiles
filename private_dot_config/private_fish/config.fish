@@ -15,6 +15,7 @@ function fisher_setup
     fisher install jbonjean/re-search
     fisher install jethrokuan/fzf
     fisher install zzhaolei/transient.fish
+    fisher install gazorby/fifc
 end
 
 function conda
@@ -42,18 +43,19 @@ which any-nix-shell &>/dev/null && any-nix-shell fish --info-right | source
 set -U FZF_DEFAULT_OPTS "--preview 'string match -rq \"[\\\"\\'*]\" {} && exit 1; [ -d \"{}\" ] && lsd --color always \"{}\"; [ -f \"{}\" ] && bat --color always --line-range :50 \"{}\"; '"
 
 if which nvim &>/dev/null
-    setenv EDITOR (which nvim)
+    setenv EDITOR nvim
 else if which vim &>/dev/null
-    setenv EDITOR (which vim)
-else
-    setenv EDITOR (which nano)
+    setenv EDITOR vim
+else if which nano &>/dev/null
+    setenv EDITOR nano
 end
+set -Ux fifc_editor "$EDITOR"
 
 abbr tre tree
 abbr clg chezmoi git lazy
 abbr cgl chezmoi git lazy
 
-abbr bubu "brew update && brew upgrade"
+abbr bubu "brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup"
 
 abbr kssh "kitty +kitten ssh"
 
@@ -63,4 +65,5 @@ setenv LC_CTYPE en_US.UTF-8
 
 if status --is-interactive
     setenv SHELL (which fish)
+    bind \cZ z
 end
