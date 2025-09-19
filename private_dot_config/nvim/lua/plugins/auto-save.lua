@@ -4,6 +4,6 @@ return {
     config = function()
       require("auto-save").setup()
     end,
-    enabled = true,
+    enabled = false,
   },
 }
