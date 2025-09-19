@@ -3,7 +3,7 @@
 read width height xorigin yorigin <<<"$(external-display-parameters)"
 selected_eight=$1
 
-menubar_height=24
+menubar_height=32
 
 let height=height-menubar_height
 let yorigin=yorigin+menubar_height

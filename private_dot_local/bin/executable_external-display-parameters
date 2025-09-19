@@ -1,0 +1,3 @@
+#!/bin/bash
+
+displayplacer list | tail -n1 | grep -o '"[^"]*"' | grep -v 'origin:(0,0)' | head -n1 | grep -o 'origin:\S*\|res:\S*' | grep -o '\-\?\d\+' | xargs
