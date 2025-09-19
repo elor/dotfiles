@@ -9,7 +9,7 @@
 # @raycast.icon ↙️
 
 # Documentation:
-# @raycast.description Moves the window to the top left of the screen.
+# @raycast.description Moves and positions the window
 # @raycast.author Erik E. Lorenz
 
 tell application "System Events"
@@ -21,8 +21,8 @@ tell application "System Events"
     set AppleScript's text item delimiters to " "
     set { w, h, x, y } to text items of output
     set AppleScript's text item delimiters to tid
-    log w & " " & h & " " & x & " " & y
-    set size of frontWindow to { w, h }
+    # log w & " " & h & " " & x & " " & y
     set position of frontWindow to { x, y }
+    set size of frontWindow to { w, h }
 end tell
 

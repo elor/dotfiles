@@ -2,11 +2,11 @@
 
 # Required parameters:
 # @raycast.schemaVersion 1
-# @raycast.title Move To Top Left Eight TL8
+# @raycast.title Move To Bottom Center BC
 # @raycast.mode silent
 
 # Optional parameters:
-# @raycast.icon ↖️
+# @raycast.icon ⬇️
 
 # Documentation:
 # @raycast.description Moves and positions the window
@@ -16,11 +16,12 @@ tell application "System Events"
     set activeApps to name of application processes whose frontmost is true
     set currentApplication to item 1 of activeApps
     set frontWindow to the first window of application process currentApplication
-    set output to do shell script "PATH=~/.local/bin:/usr/bin:/opt/homebrew/bin position-eights 1"
+    set output to do shell script "PATH=~/.local/bin:/usr/bin:/opt/homebrew/bin position-eights 6"
     set tid to AppleScript's text item delimiters
     set AppleScript's text item delimiters to " "
     set { w, h, x, y } to text items of output
     set AppleScript's text item delimiters to tid
+    set w to w*2
     # log w & " " & h & " " & x & " " & y
     set position of frontWindow to { x, y }
     set size of frontWindow to { w, h }
