@@ -51,7 +51,6 @@ else if which nano &>/dev/null
 end
 set -Ux fifc_editor "$EDITOR"
 
-abbr tre tree
 abbr clg chezmoi git lazy
 abbr cgl chezmoi git lazy
 
