@@ -1,0 +1,15 @@
+{
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
+    "ANTHROPIC_PLUGINS_ENABLE_TELEMETRY": "0",
+    "DISABLE_TELEMETRY": "1"
+  },
+  "enabledPlugins": {
+    "typescript-lsp@claude-plugins-official": true
+  },
+  "theme": "auto",
+  "statusLine": {
+    "type": "command",
+    "command": "sh /Users/elor/.claude/statusline-command.sh"
+  }
+}
