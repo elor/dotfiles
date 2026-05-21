@@ -4,13 +4,19 @@ input=$(cat)
 
 used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+five_resets_at=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
 week_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 
 parts=""
 
 # 5-hour session limit
 if [ -n "$five_pct" ]; then
-  parts=$(printf "5h:%.0f%%" "$five_pct")
+  label=$(printf "5h:%.0f%%" "$five_pct")
+  if [ -n "$five_resets_at" ]; then
+    reset_time=$(date -r "$five_resets_at" +"%H:%M")
+    label=$(printf "%s (%s)" "$label" "$reset_time")
+  fi
+  parts="$label"
 fi
 
 # 7-day weekly limit
