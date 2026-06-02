@@ -58,5 +58,5 @@ end
 
 if last_update_date() ~= today() then
   write_today()
-  vim.defer_fn(auto_update, 3000)
+  vim.defer_fn(auto_update, 500)
 end
