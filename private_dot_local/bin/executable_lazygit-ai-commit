@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -e
+
+DIFF=$(git diff --staged)
+
+if [ -z "$DIFF" ]; then
+  echo "No staged changes. Stage some files first."
+  read -rn1 -p "Press any key to close..."
+  exit 1
+fi
+
+spinner() {
+  local pid=$1 i=0
+  local frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+  while kill -0 "$pid" 2>/dev/null; do
+    printf "\r  %s  Generating commit message..." "${frames:$((i % ${#frames})):1}"
+    sleep 0.08
+    i=$((i + 1))
+  done
+  printf "\r\033[2K"
+}
+
+RECENT_COMMITS=$(git log --oneline -10 2>/dev/null | sed 's/^[a-f0-9]* //')
+
+STYLE_HINT=""
+if [ -n "$RECENT_COMMITS" ]; then
+  STYLE_HINT="
+
+Mimic the style and format of these recent commits from this repo:
+$RECENT_COMMITS"
+fi
+
+printf '%s' "$DIFF" | claude -p "Generate a concise conventional commit message for this diff. Output only the commit message — no explanation, no markdown, no quotes. Use the conventional commits format (e.g. feat:, fix:, refactor:, chore:). Keep it under 72 characters for the subject line; add a blank line and a short body if the changes are non-trivial.$STYLE_HINT" >/tmp/lazygit_ai_msg &
+CLAUDE_PID=$!
+spinner $CLAUDE_PID || true
+wait $CLAUDE_PID
+MSG=$(cat /tmp/lazygit_ai_msg)
+rm -f /tmp/lazygit_ai_msg
+
+echo "Proposed commit message:"
+echo "─────────────────────────────────────"
+echo "$MSG"
+echo "─────────────────────────────────────"
+echo ""
+printf "[C]ommit  [e]dit  [a]bort: "
+read -rn1 choice
+echo ""
+
+case "$choice" in
+c | C | "")
+  git commit -m "$MSG"
+  echo "Committed."
+  ;;
+e | E)
+  TMPFILE=$(mktemp)
+  printf '%s\n' "$MSG" >"$TMPFILE"
+  ${GIT_EDITOR:-${VISUAL:-${EDITOR:-vi}}} "$TMPFILE"
+  git commit -F "$TMPFILE"
+  rm -f "$TMPFILE"
+  echo "Committed."
+  ;;
+*)
+  echo "Aborted."
+  ;;
+esac
