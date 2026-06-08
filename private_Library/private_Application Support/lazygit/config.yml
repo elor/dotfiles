@@ -2,3 +2,9 @@ confirmOnQuit: false
 promptToReturnFromSubprocess: false
 os:
   editPreset: "nvim"
+customCommands:
+  - key: "<c-a>"
+    context: "files"
+    description: "AI: propose commit message (Claude)"
+    command: "~/.local/bin/lazygit-ai-commit"
+    output: terminal
