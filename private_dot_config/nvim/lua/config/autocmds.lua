@@ -60,3 +60,19 @@ if last_update_date() ~= today() then
   write_today()
   vim.defer_fn(auto_update, 500)
 end
+
+-- Hook into the checker's report() to auto-update when new updates are found.
+-- autocmds.lua loads on VeryLazy, after the initial fast_check has run, so we
+-- also check checker.updated directly to catch updates found at startup.
+local checker = require("lazy.manage.checker")
+if #checker.updated > 0 then
+  auto_update()
+end
+local orig_report = checker.report
+checker.report = function(notify)
+  local before = #checker.reported
+  orig_report(notify)
+  if #checker.reported > before then
+    auto_update()
+  end
+end
