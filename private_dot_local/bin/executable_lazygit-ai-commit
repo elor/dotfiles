@@ -30,36 +30,54 @@ Mimic the style and format of these recent commits from this repo:
 $RECENT_COMMITS"
 fi
 
-printf '%s' "$DIFF" | claude -p "Generate a concise conventional commit message for this diff. Output only the commit message — no explanation, no markdown, no quotes. Use the conventional commits format (e.g. feat:, fix:, refactor:, chore:). Keep it under 72 characters for the subject line; add a blank line and a short body if the changes are non-trivial.$STYLE_HINT" >/tmp/lazygit_ai_msg &
+printf '%s' "$DIFF" | claude -p "Generate a concise conventional commit message for this diff. Output only the commit message — no explanation, no markdown, no quotes. Use the conventional commits format (e.g. feat:, fix:, refactor:, chore:). Keep it under 72 characters for the subject line; add a blank line and a short body if the changes are non-trivial.$STYLE_HINT" > /tmp/lazygit_ai_msg &
 CLAUDE_PID=$!
 spinner $CLAUDE_PID || true
 wait $CLAUDE_PID
 MSG=$(cat /tmp/lazygit_ai_msg)
 rm -f /tmp/lazygit_ai_msg
 
-echo "Proposed commit message:"
-echo "─────────────────────────────────────"
-echo "$MSG"
-echo "─────────────────────────────────────"
-echo ""
-printf "[C]ommit  [e]dit  [a]bort: "
-read -rn1 choice
-echo ""
+while true; do
+  echo "Proposed commit message:"
+  echo "─────────────────────────────────────"
+  echo "$MSG"
+  echo "─────────────────────────────────────"
+  echo ""
+  printf "[C]ommit  [e]dit  [r]ephrase  [a]bort: "
+  read -rn1 choice
+  echo ""
 
-case "$choice" in
-c | C | "")
-  git commit -m "$MSG"
-  echo "Committed."
-  ;;
-e | E)
-  TMPFILE=$(mktemp)
-  printf '%s\n' "$MSG" >"$TMPFILE"
-  ${GIT_EDITOR:-${VISUAL:-${EDITOR:-vi}}} "$TMPFILE"
-  git commit -F "$TMPFILE"
-  rm -f "$TMPFILE"
-  echo "Committed."
-  ;;
-*)
-  echo "Aborted."
-  ;;
-esac
+  case "$choice" in
+    c|C|"")
+      git commit -m "$MSG"
+      echo "Committed."
+      break
+      ;;
+    e|E)
+      TMPFILE=$(mktemp)
+      printf '%s\n' "$MSG" > "$TMPFILE"
+      ${GIT_EDITOR:-${VISUAL:-${EDITOR:-vi}}} "$TMPFILE"
+      git commit -F "$TMPFILE"
+      rm -f "$TMPFILE"
+      echo "Committed."
+      break
+      ;;
+    r|R)
+      echo ""
+      printf "Feedback: "
+      read -r FEEDBACK
+      echo ""
+      printf '%s\nCurrent message: %s\nFeedback: %s' "$DIFF" "$MSG" "$FEEDBACK" \
+        | claude -p "Revise the commit message based on the user feedback. Output only the revised commit message — no explanation, no markdown, no quotes. Use the conventional commits format. Keep it under 72 characters for the subject line; add a blank line and a short body if the changes are non-trivial.$STYLE_HINT" > /tmp/lazygit_ai_msg &
+      CLAUDE_PID=$!
+      spinner $CLAUDE_PID || true
+      wait $CLAUDE_PID
+      MSG=$(cat /tmp/lazygit_ai_msg)
+      rm -f /tmp/lazygit_ai_msg
+      ;;
+    *)
+      echo "Aborted."
+      break
+      ;;
+  esac
+done
