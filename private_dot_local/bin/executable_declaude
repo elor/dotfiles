@@ -387,26 +387,25 @@ def main():
         log_findings = scan_git_log()
 
     if args.silent:
-        if log_findings or next(scan_files(), None) is not None:
-            sys.exit(1)
-        sys.exit(0)
+        sys.exit(1 if log_findings else 0)
 
-    found = False
+    errors = False
     for prefix, full_hash, date, lines in log_findings:
-        found = True
+        errors = True
         short = full_hash[:8]
         for ln in lines:
             label = f"{prefix}{short}" if prefix else short
             print(f"{RED}{BOLD}error{RESET}: [{label} {date}] {ln.strip()}{RESET}")
 
+    warnings = False
     for rel, lineno, line in scan_files():
-        found = True
+        warnings = True
         print(f"{YELLOW}{BOLD}warn{RESET}: {rel}:{lineno}: {line.strip()}{RESET}")
 
-    if not found:
+    if not errors and not warnings:
         print("No Claude co-authorship found.")
 
-    sys.exit(1 if found else 0)
+    sys.exit(1 if errors else 0)
 
 
 if __name__ == "__main__":
