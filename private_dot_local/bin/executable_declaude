@@ -1,0 +1,413 @@
+#!/usr/bin/env python3
+"""declaude - scan for Claude co-authorship in git history and working files."""
+
+import argparse
+import os
+import re
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+RED = "\033[31m"
+YELLOW = "\033[33m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+
+# Patterns that indicate Claude co-authorship or generation
+_PATTERNS = [
+    r"Co-Authored-By:.*claude",
+    r"Co-Author:.*claude",
+    r"Generated with .{0,4}Claude",
+    r"noreply@anthropic[.]com",
+    "\U0001F916",  # 🤖 robot face emoji used in Claude Code footers
+]
+PATTERN = re.compile("|".join(_PATTERNS), re.IGNORECASE)
+
+
+def in_git_repo():
+    return subprocess.run(
+        ["git", "rev-parse", "--git-dir"], capture_output=True
+    ).returncode == 0
+
+
+def submodule_paths(repo_root):
+    """Return absolute paths of all registered submodules (non-recursive)."""
+    result = subprocess.run(
+        ["git", "submodule", "foreach", "--quiet", "--recursive", "echo $displaypath"],
+        capture_output=True, text=True, cwd=repo_root,
+    )
+    return [repo_root / p for p in result.stdout.splitlines() if p]
+
+
+def scan_git_log_in(repo_dir, prefix=""):
+    """Return list of (label, short_hash, date, [matching lines]) for offending commits."""
+    try:
+        rows = subprocess.run(
+            ["git", "log", "--branches", "--tags", "--remotes", "--format=%H %cs"],
+            capture_output=True, text=True, check=True, cwd=repo_dir,
+        ).stdout.strip().splitlines()
+    except subprocess.CalledProcessError:
+        return []
+
+    findings = []
+    for row in rows:
+        h, _, date = row.partition(" ")
+        try:
+            body = subprocess.run(
+                ["git", "show", "-s", "--format=%B", h],
+                capture_output=True, text=True, check=True, cwd=repo_dir,
+            ).stdout
+        except subprocess.CalledProcessError:
+            continue
+        matches = [ln for ln in body.splitlines() if PATTERN.search(ln)]
+        if matches:
+            findings.append((prefix, h, date, matches))  # full hash
+    return findings
+
+
+def scan_git_log():
+    """Scan main repo and all submodules; yield (prefix, short_hash, date, lines)."""
+    cwd = Path.cwd()
+    results = scan_git_log_in(cwd)
+    for sub in submodule_paths(cwd):
+        rel = sub.relative_to(cwd)
+        results += scan_git_log_in(sub, prefix=f"{rel}/")
+    return results
+
+
+def scan_files_in(repo_dir, base):
+    """Yield (display_path, lineno, line) for files with co-authorship mentions."""
+    try:
+        result = subprocess.run(
+            ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+            capture_output=True, text=True, check=True, cwd=repo_dir,
+        )
+        paths = [repo_dir / p for p in result.stdout.splitlines() if p]
+    except subprocess.CalledProcessError:
+        paths = [p for p in repo_dir.rglob("*") if p.is_file()]
+
+    for path in paths:
+        if not path.is_file():
+            continue
+        try:
+            raw = path.read_bytes()
+            if b"\x00" in raw[:8192]:  # skip binary files
+                continue
+            lines = raw.decode("utf-8", errors="replace").splitlines()
+        except OSError:
+            continue
+        for i, line in enumerate(lines, 1):
+            if PATTERN.search(line):
+                try:
+                    rel = path.relative_to(base)
+                except ValueError:
+                    rel = path
+                yield rel, i, line
+
+
+def scan_files():
+    """Scan main repo and all submodules."""
+    cwd = Path.cwd()
+    yield from scan_files_in(cwd, cwd)
+    for sub in submodule_paths(cwd):
+        yield from scan_files_in(sub, cwd)
+
+
+def build_filter_script():
+    """Return Python source for the git filter-branch msg-filter."""
+    robot = "\U0001F916"
+    return (
+        "import sys, re\n"
+        "PAT = re.compile('|'.join([\n"
+        "    r'Co-Authored-By:.*claude',\n"
+        "    r'Co-Author:.*claude',\n"
+        "    r'Generated with .{0,4}Claude',\n"
+        "    r'noreply@anthropic[.]com',\n"
+        f"    '{robot}',\n"
+        "]), re.IGNORECASE)\n"
+        "lines = sys.stdin.read().splitlines(keepends=True)\n"
+        "out = [l for l in lines if not PAT.search(l)]\n"
+        "while out and not out[-1].strip():\n"
+        "    out.pop()\n"
+        "sys.stdout.write(''.join(out) + ('\\n' if out else ''))\n"
+    )
+
+
+def minimal_bad_commits(repo_dir, bad_hashes):
+    """Return only the oldest bad commits — those not reachable from any other bad commit."""
+    bad_list = list(bad_hashes)
+    if len(bad_list) <= 1:
+        return bad_list
+    result = []
+    for h in bad_list:
+        others = [b for b in bad_list if b != h]
+        ancestors_of_others = subprocess.run(
+            ["git", "rev-list"] + others,
+            capture_output=True, text=True, cwd=repo_dir,
+        ).stdout.splitlines()
+        if h not in ancestors_of_others:
+            result.append(h)
+    return result
+
+
+def fix_repo(repo_dir, script_path, oldest_bad, label=""):
+    """Run filter-branch in one repo dir, stashing/unstashing as needed."""
+    tag = f" ({label})" if label else ""
+    env = os.environ.copy()
+    env["FILTER_BRANCH_SQUELCH_WARNING"] = "1"
+
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"], capture_output=True, text=True, cwd=repo_dir,
+    ).stdout.strip()
+    stashed = False
+    if dirty:
+        print(f"Stashing uncommitted changes{tag}...")
+        subprocess.run(
+            ["git", "stash", "push", "--include-untracked", "-m", "declaude-pre-fix"],
+            check=True, cwd=repo_dir,
+        )
+        stashed = True
+
+    try:
+        # Build rev-list range: start from just before the oldest bad commits
+        # so unaffected history keeps its original hashes.
+        rev_args = ["--branches", "--tags", "--remotes"]
+        for h in oldest_bad:
+            parent_exists = subprocess.run(
+                ["git", "rev-parse", "--verify", f"{h}^"],
+                capture_output=True, cwd=repo_dir,
+            ).returncode == 0
+            if parent_exists:
+                rev_args += ["--not", f"{h}^"]
+
+        print(f"Rewriting git history{tag}...")
+        subprocess.run(
+            [
+                "git", "filter-branch", "-f", "--msg-filter",
+                f"{sys.executable} {script_path}",
+                "--", *rev_args,
+            ],
+            check=True, cwd=repo_dir, env=env,
+        )
+        orig_refs = subprocess.run(
+            ["git", "for-each-ref", "--format=%(refname)", "refs/original/"],
+            capture_output=True, text=True, cwd=repo_dir,
+        ).stdout.strip().splitlines()
+        for ref in orig_refs:
+            subprocess.run(["git", "update-ref", "-d", ref], check=False, cwd=repo_dir)
+    finally:
+        if stashed:
+            print(f"Restoring stashed changes{tag}...")
+            subprocess.run(["git", "stash", "pop"], check=False, cwd=repo_dir)
+
+
+def push_repo(repo_dir, label=""):
+    """Force-push all branches and tags to every remote."""
+    tag = f" ({label})" if label else ""
+    remotes = subprocess.run(
+        ["git", "remote"], capture_output=True, text=True, cwd=repo_dir,
+    ).stdout.strip().splitlines()
+    if not remotes:
+        print(f"No remotes configured{tag}, skipping push.")
+        return
+    for remote in remotes:
+        print(f"Pushing to {remote}{tag}...")
+        subprocess.run(
+            ["git", "push", remote, "--force-with-lease", "--all"],
+            check=True, cwd=repo_dir,
+        )
+        subprocess.run(
+            ["git", "push", remote, "--force-with-lease", "--tags"],
+            check=True, cwd=repo_dir,
+        )
+
+
+def do_fix(push=False, local_only=False):
+    script_src = build_filter_script()
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".py", delete=False, prefix="declaude_", encoding="utf-8"
+    ) as f:
+        f.write(script_src)
+        script_path = f.name
+
+    try:
+        cwd = Path.cwd()
+        subs = submodule_paths(cwd)
+
+        def bad_hashes_for(repo_dir):
+            if local_only:
+                rows = local_only_commits(repo_dir)
+                findings = scan_git_log_in_range(repo_dir, rows)
+            else:
+                findings = scan_git_log_in(repo_dir)
+            return {h for _, h, _, _ in findings}
+
+        repos_to_fix = []
+        bad = bad_hashes_for(cwd)
+        if bad:
+            repos_to_fix.append((cwd, "", minimal_bad_commits(cwd, bad)))
+        for sub in subs:
+            label = str(sub.relative_to(cwd))
+            bad = bad_hashes_for(sub)
+            if bad:
+                repos_to_fix.append((sub, label, minimal_bad_commits(sub, bad)))
+            else:
+                print(f"Skipping {label} (no co-authorship found).")
+
+        for repo_dir, label, oldest_bad in repos_to_fix:
+            fix_repo(repo_dir, script_path, oldest_bad, label=label)
+        if push:
+            for repo_dir, label, _ in repos_to_fix:
+                push_repo(repo_dir, label=label)
+        else:
+            print("Note: force-push all branches if this repo has a remote.")
+        print("Done.")
+    finally:
+        os.unlink(script_path)
+
+
+_DEFAULT_HOOKS_DIR = Path.home() / ".config" / "git" / "hooks"
+
+
+def global_hooks_dir():
+    result = subprocess.run(
+        ["git", "config", "--global", "core.hooksPath"],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0 and result.stdout.strip():
+        return Path(result.stdout.strip()).expanduser()
+    return None
+
+
+def cmd_hook():
+    hooks_dir = global_hooks_dir() or _DEFAULT_HOOKS_DIR
+    hook_path = hooks_dir / "pre-push"
+
+    result = subprocess.run(
+        ["git", "config", "--global", "--list", "--show-origin"],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0 and result.stdout.strip():
+        gitconfig = result.stdout.splitlines()[0].split("\t")[0].removeprefix("file:")
+    else:
+        gitconfig = str(Path.home() / ".gitconfig")
+
+    print(f"# {gitconfig}")
+    print(f"[core]")
+    print(f"    hooksPath = {hooks_dir}")
+    print()
+    print(f"# {hook_path}")
+    print(f"#!/bin/sh")
+    print(f"declaude check --silent --local")
+
+
+def local_only_commits(repo_dir):
+    """Return hashes of commits not yet pushed to any remote."""
+    result = subprocess.run(
+        ["git", "log", "--branches", "--not", "--remotes", "--format=%H %cs"],
+        capture_output=True, text=True, cwd=repo_dir,
+    )
+    return result.stdout.strip().splitlines() if result.returncode == 0 else []
+
+
+def scan_git_log_in_range(repo_dir, rows, prefix=""):
+    findings = []
+    for row in rows:
+        h, _, date = row.partition(" ")
+        try:
+            body = subprocess.run(
+                ["git", "show", "-s", "--format=%B", h],
+                capture_output=True, text=True, check=True, cwd=repo_dir,
+            ).stdout
+        except subprocess.CalledProcessError:
+            continue
+        matches = [ln for ln in body.splitlines() if PATTERN.search(ln)]
+        if matches:
+            findings.append((prefix, h, date, matches))
+    return findings
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        description="Scan git history and working files for Claude co-authorship."
+    )
+    sub = ap.add_subparsers(dest="command")
+
+    check_p = sub.add_parser("check", help="Scan for co-authorship")
+    check_p.add_argument("-s", "--silent", action="store_true",
+                         help="No output; exit 1 on first offense (for use as a pre-push hook)")
+    check_p.add_argument("--local", action="store_true",
+                         help="Only scan commits not yet pushed to any remote")
+
+    fix_p = sub.add_parser("fix", help="Rewrite git history to remove co-authorship")
+    fix_p.add_argument("--local", action="store_true",
+                       help="Only rewrite commits not yet pushed to any remote")
+    fix_p.add_argument("--push", action="store_true",
+                       help="Force-push all branches and tags after rewriting (--force-with-lease)")
+
+    sub.add_parser("hook", help="Print global pre-push hook setup instructions")
+
+    args = ap.parse_args()
+
+    if args.command is None:
+        ap.print_help()
+        return
+
+    if args.command == "hook":
+        cmd_hook()
+        return
+
+    is_git = in_git_repo()
+
+    if args.command == "fix":
+        if not is_git:
+            sys.exit("fatal: not a git repository")
+        print(f"{YELLOW}Warning: fix rewrites git history. "
+              f"Ensure you have a backup or remote to recover from.{RESET}")
+        if args.push:
+            print(f"{YELLOW}--push will force-push all branches and tags to every remote.{RESET}")
+        if input("Proceed? [y/N] ").strip().lower() != "y":
+            sys.exit("Aborted.")
+        do_fix(push=args.push, local_only=args.local)
+        return
+
+    # check
+    if not is_git:
+        sys.exit(0)
+
+    if args.local:
+        cwd = Path.cwd()
+        log_findings = scan_git_log_in_range(cwd, local_only_commits(cwd))
+        for sm in submodule_paths(cwd):
+            log_findings += scan_git_log_in_range(
+                sm, local_only_commits(sm), prefix=f"{sm.relative_to(cwd)}/"
+            )
+    else:
+        log_findings = scan_git_log()
+
+    if args.silent:
+        if log_findings or next(scan_files(), None) is not None:
+            sys.exit(1)
+        sys.exit(0)
+
+    found = False
+    for prefix, full_hash, date, lines in log_findings:
+        found = True
+        short = full_hash[:8]
+        for ln in lines:
+            label = f"{prefix}{short}" if prefix else short
+            print(f"{RED}{BOLD}error{RESET}: [{label} {date}] {ln.strip()}{RESET}")
+
+    for rel, lineno, line in scan_files():
+        found = True
+        print(f"{YELLOW}{BOLD}warn{RESET}: {rel}:{lineno}: {line.strip()}{RESET}")
+
+    if not found:
+        print("No Claude co-authorship found.")
+
+    sys.exit(1 if found else 0)
+
+
+if __name__ == "__main__":
+    main()
