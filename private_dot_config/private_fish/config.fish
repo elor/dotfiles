@@ -54,7 +54,7 @@ set -Ux fifc_editor "$EDITOR"
 abbr clg chezmoi git lazy
 abbr cgl chezmoi git lazy
 
-abbr bubu "brew update && brew upgrade && brew upgrade --cask --greedy && brew cleanup"
+abbr bubu "brew update && brew upgrade --yes && brew upgrade --cask --greedy --yes && brew cleanup"
 
 abbr kssh "kitty +kitten ssh"
 
