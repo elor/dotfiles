@@ -2,6 +2,7 @@
 # Claude Code statusLine command — shows a compact /usage summary
 input=$(cat)
 
+
 used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 five_resets_at=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
@@ -26,7 +27,7 @@ if [ -n "$week_pct" ]; then
 fi
 
 # Context window usage (last)
-if [ -n "$used" ]; then
+if [ -n "$used" ] && [ "$used" != "0" ]; then
   ctx=$(printf "ctx:%.0f%%" "$used")
   parts="$parts | $ctx"
 fi
