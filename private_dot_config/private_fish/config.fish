@@ -60,6 +60,8 @@ abbr kssh "kitty +kitten ssh"
 
 abbr tldl "tldr -p linux"
 
+abbr ccon "claude --continue"
+
 setenv LC_CTYPE en_US.UTF-8
 
 if status --is-interactive
