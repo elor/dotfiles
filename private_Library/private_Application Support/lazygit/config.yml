@@ -8,3 +8,8 @@ customCommands:
     description: "AI: propose commit message (Claude)"
     command: "~/.local/bin/lazygit-ai-commit"
     output: terminal
+  - key: "<c-x>"
+    context: "commits"
+    description: "declaude: strip Claude co-authorship from local commits"
+    command: "~/.local/bin/declaude fix --local"
+    output: terminal
