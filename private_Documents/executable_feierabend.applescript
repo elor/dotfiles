@@ -19,3 +19,8 @@ tell application "Skype for Business" to quit
 tell application "zoom.us" to quit
 tell application "Microsoft Word" to quit
 tell application "Microsoft Excel" to quit
+tell application "Microsoft PowerPoint" to quit
+
+do shell script "networksetup -listpppoeservices | while IFS= read -r vpn; do networksetup -disconnectpppoeservice \"$vpn\"; done"
+
+tell application "eduVPN" to quit
