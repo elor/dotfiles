@@ -1,0 +1,9 @@
+#!/bin/sh
+PATH="$HOME/.local/bin:$PATH"
+
+if ! declaude check --local; then
+    echo ""
+    echo "Push blocked: Claude co-authorship markers found in the commits above."
+    echo "Run 'declaude fix --local' to rewrite history, then push again."
+    exit 1
+fi
