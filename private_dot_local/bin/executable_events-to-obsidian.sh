@@ -2,13 +2,18 @@
 
 set -e -u
 
-# Get today's date in ISO format
-TODAY=$(date +"%Y-%m-%d")
 VAULT=~/Documents/Speicherwolke/Notes/
 
-# Get the calendar events for today using icalBuddy
-{
-  obsidian-macos-calendar-bridge
-} | sed -i '' '/^#* Meetings$/r /dev/stdin' $VAULT/Daily/"$TODAY.md"
+EVENTS=$(obsidian-macos-calendar-bridge 2>/dev/null || echo "")
 
-echo "wrote events to $VAULT/Daily/$TODAY.md"
+if [[ -z "$EVENTS" ]]; then
+  exit 0
+fi
+
+DAILY_PATH="$VAULT$(obsidian daily:path)"
+
+if [[ ! -f "$DAILY_PATH" ]]; then
+  obsidian daily
+fi
+
+echo "$EVENTS" | sed -i '' '/^#* Meetings$/r /dev/stdin' "$DAILY_PATH"
