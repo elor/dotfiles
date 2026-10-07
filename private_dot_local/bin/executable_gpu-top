@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""gpu-top: GPU-Auslastung auf Apple Silicon, gesamt und je Prozess, ohne sudo.
+
+Quellen (ioreg): IOAccelerator/PerformanceStatistics (Gesamtauslastung, GPU-Speicher) und
+AGXDeviceUserClient/AppUsage (aufsummierte GPU-Zeit je Metal-Client). Die Prozesswerte sind
+die Differenz zweier Messungen / Intervall; > 100 % ist möglich, wenn ein Prozess mehrere
+Command-Queues parallel laufen lässt.
+
+  gpu-top            laufend, alle 1 s
+  gpu-top -i 2       Intervall 2 s
+  gpu-top --csv f    zusätzlich je Messung eine Zeile in f (Zeit, Gesamt-%, kiara-transcribe-%)
+"""
+import argparse
+import os
+import plistlib
+import re
+import subprocess
+import sys
+import time
+
+
+def ioreg(cls: str) -> list:
+    out = subprocess.run(["ioreg", "-a", "-r", "-c", cls], capture_output=True).stdout
+    return plistlib.loads(out) if out.strip() else []
+
+
+def device_stats() -> dict:
+    for d in ioreg("IOAccelerator"):
+        ps = d.get("PerformanceStatistics")
+        if ps:
+            return ps
+    return {}
+
+
+def gpu_times() -> dict[int, tuple[str, int]]:
+    """pid -> (Kurzname, aufsummierte GPU-Zeit in ns)."""
+    res: dict[int, tuple[str, int]] = {}
+    for c in ioreg("AGXDeviceUserClient"):
+        m = re.match(r"pid (\d+), (.*)", c.get("IOUserClientCreator", ""))
+        if not m:
+            continue
+        pid, name = int(m.group(1)), m.group(2)
+        t = sum(u.get("accumulatedGPUTime", 0) for u in c.get("AppUsage", []))
+        old = res.get(pid, (name, 0))[1]
+        res[pid] = (name, old + t)
+    return res
+
+
+def commands(pids) -> dict[int, str]:
+    if not pids:
+        return {}
+    out = subprocess.run(["ps", "-o", "pid=,command=", "-p", ",".join(map(str, pids))],
+                         capture_output=True, text=True).stdout
+    res = {}
+    for line in out.splitlines():
+        pid, _, cmd = line.strip().partition(" ")
+        res[int(pid)] = cmd
+    return res
+
+
+def label(name: str, cmd: str) -> str:
+    if "kiara-transcribe" in cmd or "kiara_transcribe" in cmd:
+        return "kiara-transcribe"
+    if cmd:
+        exe = os.path.basename(cmd.split(" ")[0])
+        if ".app/" in cmd:
+            exe = re.search(r"/([^/]+)\.app/", cmd).group(1)
+        return exe[:28]
+    return name
+
+
+def short(cmd: str) -> str:
+    """Befehlszeile mit Basenames statt Pfaden: 'Python kiara-transcribe --resume'."""
+    return " ".join(os.path.basename(x) if "/" in x else x for x in cmd.split())
+
+
+def swap() -> str:
+    out = subprocess.run(["sysctl", "-n", "vm.swapusage"], capture_output=True, text=True).stdout
+    m = re.search(r"used = ([\d.,]+[MG])", out)
+    return m.group(1) if m else "?"
+
+
+def bar(p: float, w: int = 30) -> str:
+    n = int(round(min(p, 100) / 100 * w))
+    return "█" * n + "·" * (w - n)
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("-i", "--interval", type=float, default=1.0)
+    ap.add_argument("-n", "--top", type=int, default=12, help="so viele Prozesse zeigen")
+    ap.add_argument("--csv", help="Messwerte zusätzlich in diese Datei anhängen")
+    a = ap.parse_args()
+    csv = open(a.csv, "a", buffering=1) if a.csv else None
+    prev, t_prev = gpu_times(), time.monotonic()
+    peak_hist: list[float] = []
+    try:
+        while True:
+            time.sleep(a.interval)
+            cur, t_now = gpu_times(), time.monotonic()
+            dt_ns = (t_now - t_prev) * 1e9
+            rows = []
+            for pid, (name, t) in cur.items():
+                d = t - prev.get(pid, (name, t))[1]
+                if d > 0:
+                    rows.append((d / dt_ns * 100, pid, name))
+            prev, t_prev = cur, t_now
+            cmds = commands([r[1] for r in rows])
+            ds = device_stats()
+            util = float(ds.get("Device Utilization %", 0))
+            peak_hist = (peak_hist + [util])[-60:]
+            mem = ds.get("In use system memory", 0) / 2**30
+            rows.sort(reverse=True)
+            kt = sum(p for p, pid, _ in rows if label("", cmds.get(pid, "")) == "kiara-transcribe")
+            out = [f"\x1b[H\x1b[2J GPU gesamt {util:5.1f} %  {bar(util)}   "
+                   f"Ø60 {sum(peak_hist) / len(peak_hist):4.1f} %  max60 {max(peak_hist):4.1f} %",
+                   f" Renderer {ds.get('Renderer Utilization %', 0)} %   Tiler {ds.get('Tiler Utilization %', 0)} %   "
+                   f"GPU-Speicher in Benutzung {mem:.1f} GB   Swap {swap()}",
+                   f" kiara-transcribe zusammen {kt:5.1f} %   Reserve ≈ {max(0.0, 100 - util):.0f} %",
+                   "", f" {'GPU %':>6}  {'PID':>6}  Programm"]
+            for p, pid, name in rows[:a.top]:
+                cmd = cmds.get(pid, "")
+                out.append(f" {p:6.1f}  {pid:>6}  {label(name, cmd):<20} {short(cmd)[:80]}")
+            out.append(f"\n Intervall {a.interval:g} s · Strg-C beendet")
+            sys.stdout.write("\n".join(out) + "\n")
+            sys.stdout.flush()
+            if csv:
+                csv.write(f"{time.strftime('%H:%M:%S')},{util:.1f},{kt:.1f}\n")
+    except KeyboardInterrupt:
+        pass
+
+
+if __name__ == "__main__":
+    main()
