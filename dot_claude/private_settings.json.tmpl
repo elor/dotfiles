@@ -27,31 +27,44 @@
       "Bash(pip3 install *)",
       "Bash(npm install *)",
       "Bash(npx *)"
-    ]
+    ],
+    "defaultMode": "auto"{{ if hasKey . "claudeAdditionalDirectories" }},
+    "additionalDirectories": {{ toPrettyJson "  " .claudeAdditionalDirectories | trim | replace "\n" "\n    " }}{{ end }}
+  },
+  "model": "opus[1m]",
+  "worktree": {
+    "baseRef": "fresh",
+    "bgIsolation": "none"
   },
   "statusLine": {
     "type": "command",
     "command": "sh {{ .chezmoi.homeDir }}/.claude/statusline-command.sh"
   },
   "enabledPlugins": {
-    "typescript-lsp@claude-plugins-official": true,
+    "typescript-lsp@claude-plugins-official": false,
     "pyright-lsp@claude-plugins-official": true,
-    "rust-analyzer-lsp@claude-plugins-official": true,
-    "lua-lsp@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": false,
+    "lua-lsp@claude-plugins-official": false,
     "chrome-devtools-mcp@claude-plugins-official": false,
     "gitlab@claude-plugins-official": false,
-    "swift-lsp@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": false,
     "gopls-lsp@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true
   },
   "effortLevel": "high",
+  "modelSettings": {
+    "claude-opus-5": {
+      "effortLevel": "high"
+    }
+  },
+  "tui": "fullscreen",
   "voice": {
-    "enabled": true,
+    "enabled": false,
     "mode": "hold"
   },
   "theme": "auto",
   "preferredNotifChannel": "auto",
   "autoCompactEnabled": true,
-  "voiceEnabled": true
+  "voiceEnabled": false
 }
